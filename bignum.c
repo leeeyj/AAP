@@ -1,23 +1,32 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#define NON_NEGATIVE 0;
-#define NEGATIVE 1;
+
 /*
-ADD, SUB, MULTIPLE,  DIVISION, modulo,,,,암호에 쓰일 함수들...EC..???? 프린트함수  뭐 이런거 짜야해요~~~
-bignum에 우리가 원하는 크기 입력해주면(ex 64byte, 64_size)
+bignum에 우리가 원하는 크기 정해주면(ex unsigned char, unsigned int, unsigned longlong)
 64_size라는 자료형이 생성되고
 그걸 기반으로 사용할 연산들을 정의해주는 library구현입니다!!
 */
 
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#define NON_NEGATIVE 0
+#define NEGATIVE 1
+
+int Dtype = 0; 
+
+
+
 /*
     자료형의 크기를 선택할 수 있습니다.
 */
-typedef unsigned char word;
-/*
-typedef unsigned int u_int32;
-typedef unsigned long long u_int32;
-*/
+if(Dtype = 0)
+    typedef unsigned char word;
+else if(Dtype = 1)
+    typedef unsigned int word;
+else
+    typedef unsigned long long word;
+
+
 //freesize선언
 typedef struct {
     int sign;           //NEGATIVE or NON - NEGATIVE
@@ -30,6 +39,8 @@ typedef struct {
 
 Zerorize 함수안에 arr init 구현하는건가요..???
 */    
+
+
 //제거자
 void bignum_delete(bignum* x)
 {
@@ -73,7 +84,7 @@ void bignum_refine ( bignum * x)
         x ->a = ( word *) realloc (x - >a , sizeof ( word )* new_wordlen );
     }
 
-    if ((x - > wordlen == 1) && (x -> a [0] == 0 x0 ))
+    if ((x - > wordlen == 1) && (x -> a [0] == 0x0 ))
         x -> sign = NON_NEGATIVE ;
 }
 
