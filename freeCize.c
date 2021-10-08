@@ -1,5 +1,6 @@
 #include "freeCize.h" 
 
+// Creat and Delete Bigint //
 void bigint_create(bigint** x, int wordlen)
 {
     if (*x != NULL)
@@ -8,7 +9,7 @@ void bigint_create(bigint** x, int wordlen)
     *x = (bigint*)malloc(sizeof(bigint));
     
     if (*x != NULL) {
-        (*x)->sign = 0;
+        (*x)->sign = NON_NEGATVE;
         (*x)->wordlen = wordlen;
         (*x)->a = (word*)calloc(wordlen, sizeof(word));  // 메모리를 0으로 초기화 
         // printf("Success..");
@@ -35,7 +36,6 @@ void array_copy(word* dest, word* src, int wordlen)                     // Copy 
 
 void bigint_set_by_array(bigint** x, int sign, word* t, int wordlen)    // Setting bigint by array
 {
-    // 생성부터 하고 가야할까?
     bigint_create(x, wordlen);
     (*x)->sign = sign;
     array_copy((*x)->a, t, wordlen);
@@ -46,7 +46,7 @@ void bigint_set_by_string(bigint** x, int sign, char* str, int base)    // Setti
     // string how...?
 }
 
-// Show(print) Bigint
+// Show(print) Bigint //
 void show_bigint_hex(bigint *x)
 {   
     #if size_of_word == 4
@@ -68,3 +68,113 @@ void show_bigint_hex(bigint *x)
     }
     #endif
 }
+
+void show_bigint_dec(bigint* x)
+{
+    // How...?
+}
+
+void show_bigint_bin(bigint* x)
+{
+    // How...?
+}
+
+// Refine Bigint //
+void bigint_refine(bigint* x)
+{
+    if (x == NULL)
+        return;
+    
+    int new_wordlen = x->wordlen;
+    while(new_wordlen > 1){
+        if (x->a[new_wordlen - 1] != 0)
+            break;
+        new_wordlen--;
+    }
+
+    if (x->wordlen != new_wordlen){
+        x->wordlen = new_wordlen;
+        x->a = (word*)realloc(x->a, sizeof(word)*new_wordlen);
+    }
+
+    if((x->wordlen == 1) && (x->a[0] == 0x0))
+        x->sign = NON_NEGATVE;
+}
+
+// Assign Bigint //
+void bigint_assign(bigint** y, bigint* x)
+{
+    if(*y != NULL)
+        bigint_delete(y);
+    
+    bigint_create(y, x->wordlen);
+    (*y)->sign = x->sign;
+    array_copy((*y)->a, x->a, x->wordlen);
+}
+
+// Generate Random Bigint //
+void bigint_gen_rand(bigint** x, int sign, int wordlen)
+{
+    bigint_create(x, wordlen);
+    (*x)->sign = sign;
+    array_rand((*x)->a, wordlen);
+
+    bigint_refine(*x);
+}
+
+void array_rand(word* dst, int wordlen)
+{
+    byte* p = (byte*)dst;
+    int cnt = wordlen * sizeof(word);
+    srand(time(NULL));                      // Seed = Current time
+    // srand(0);
+    while(cnt > 0)
+    {
+        *p = rand() & 0xff;                 // rand() is not safe, use "srand(time(NULL))",  
+        p++;
+        cnt--;
+    }
+}
+
+// Set one, Set Zero //
+void bigint_set_one(bigint** x)
+{
+    bigint_create(x, 1);
+    (*x)->sign = NON_NEGATVE;
+    (*x)->a[0] = 0x01;
+}
+
+void bigint_set_zero(bigint** x)
+{
+    bigint_create(x, 1);
+    (*x)->sign = NON_NEGATVE;
+    (*x)->a[0] = 0x00;    
+}
+
+// IsZero? IsOne? 이거 뭐하는 함수죠...? //
+bool IsZero(bigint* x)
+{
+    if (x->sign == 1 || x->a[0] != 0)
+        return false;
+    
+    for (int i = (x->wordlen) - 1; i >= 1; i--){
+        if (x->a[i] != 0)
+            return false;
+    }
+
+    return true;
+}
+
+bool IsOne(bigint* x)
+{
+    if (x->sign == 1 || x->a[0] != 1)
+        return false;
+    
+    for (int i = (x->wordlen) - 1; i >= 1; i--){
+        if (x->a[i] != 0)
+            return false;
+    }
+
+    return true;
+}
+
