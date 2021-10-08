@@ -27,34 +27,44 @@ void bigint_delete(bigint** x)
     *x = NULL;
 }
 
-void bigint_set_by_array(bigint** x, int sign, word* t, int wordlen)
+// Setting Big int //
+void array_copy(word* dest, word* src, int wordlen)                     // Copy array
+{
+    memcpy(dest, src, sizeof(word) * wordlen);
+}
+
+void bigint_set_by_array(bigint** x, int sign, word* t, int wordlen)    // Setting bigint by array
 {
     // 생성부터 하고 가야할까?
     bigint_create(x, wordlen);
     (*x)->sign = sign;
-    (*x)->a = t;
-    // 뭐하는 함수 였더라...?
-    // 기억이 안 나네;;
+    array_copy((*x)->a, t, wordlen);
 }
 
-void bigint_set_by_string(bigint** x, int sign, char* str, int base)
+void bigint_set_by_string(bigint** x, int sign, char* str, int base)    // Setting bigint by string
 {
-    // 뭐하는 함수 였더라...?
-    // 기억이 안 나네;;
+    // string how...?
 }
 
+// Show(print) Bigint
 void show_bigint_hex(bigint *x)
-{
-
+{   
+    #if size_of_word == 4
     // Case 1: word is unsigned int
     for (int i = (x->wordlen) - 1; i >= 0; i--){
         printf("%08x", x->a[i]);
     }
     
+    #elif size_of_word == 1
     // Case 2: word is unsigned char
-    // code...
+    for  (int i = (x->wordlen) -1 ; i >=0; i--){
+        printf("%02x", x->a[i])
+    }
 
+    #elif size_of_word == 8
     // Case 3 : word is unsigned long long 
-    // code...
-
+    for  (int i = (x->wordlen) -1 ; i >=0; i--){
+        printf("%016x", x->a[i])
+    }
+    #endif
 }
