@@ -6,11 +6,7 @@ bignum에 우리가 원하는 크기 정해주면(ex unsigned char, unsigned int
 */
 
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#define NON_NEGATIVE 0
-#define NEGATIVE 1
+#include "bignum.h"
 
 
 int Dtype = 0; 
@@ -133,16 +129,16 @@ void bignum_set_by_array(bignum** x, int sign, word* a, int wordlen) // bigint x
 }
 
 //맞게 구현한건가...?/???
-void binum_set_by_string(bigint** x, int sign, char* str, int base)// bigint x <- base string        //////////////////base가 무슨 의미일까,,, 스트링 길이???
+void bignum_set_by_string(bignum** x, int sign, char* str, int base)// bigint x <- base string        //////////////////base가 무슨 의미일까,,, 스트링 길이???
 {
 if (*x != NULL )
     bignum_delete (x);
-    bignum_new (x , wordlen );
+    bignum_new (x , base );
     (*x) -> sign = sign;
     memcpy((*x ) ->a , str , base );
 }
 
-void bignum_show_hex(bigint* x)
+void bignum_show_hex(bignum* x)
 {
     int len = (*x)->wordlen;
     for(int i=0;i<len;i++)
@@ -152,13 +148,13 @@ void bignum_show_hex(bigint* x)
     
 }
 
-void bignum_show_dec(bigint* x)
+void bignum_show_dec(bignum* x)
 {
     // show얘네는 char int longlong나눠서 생각해야 하는거 아닌가요...?????
     
 }
 
-void bignum_show_dec(bigint* x)
+void bignum_show_dec(bignum* x)
 {
    
     
@@ -197,7 +193,7 @@ void bignum_set_one ( bignum ** x)
     (*x) ->a[0] = 0 x1 ;
 }
 
- void bignum_set_zero ( bignum ** x )
+void bignum_set_zero ( bignum ** x )
 {
     bi_new (x , 1) ;
     (*x) -> sign = NON_NEGATIVE ;
