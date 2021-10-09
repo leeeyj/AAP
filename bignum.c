@@ -21,20 +21,25 @@ int main()
     //
 
     // Test generate random bigint 
-    bigint_gen_rand(&A, NON_NEGATVE, 2);
+    // bigint_gen_rand(&A, NON_NEGATVE, 2);
     // bigint_gen_rand1(&B, NON_NEGATVE, 2);
-    show_bigint_hex(A);
+    // show_bigint_hex(A);
     // show_bigint_hex(B);
     // Test compare two bigint
-    if (Compare(A, B) == 1)
-        printf("A > B");
-    else if (Compare(A, B) == -1)
-        printf("A < B");
-    else
-        printf(" A = B");
+    // if (Compare(A, B) == 1)
+    //     printf("A > B");
+    // else if (Compare(A, B) == -1)
+    //     printf("A < B");
+    // else
+    //     printf(" A = B");
     // show_bigint_hex(A);
-    bigint_delete(&A);
-    bigint_delete(&B);
+    //
+
+    // Test deleting bigint
+    // bigint_delete(&A);
+    // bigint_delete(&B);
+    //
+
     return 0;
 }
 
