@@ -7,7 +7,7 @@
 #define size_of_word 4
 #define NON_NEGATVE 0
 
-typedef char byte;
+typedef unsigned char byte;
 
 #if size_of_word == 1
 typedef unsigned char word;
