@@ -54,18 +54,22 @@ void show_bigint_hex(bigint *x)
     for (int i = (x->wordlen) - 1; i >= 0; i--){
         printf("%08x", x->a[i]);
     }
+    printf("\n");
     
     #elif size_of_word == 1
     // Case 2: word is unsigned char
     for  (int i = (x->wordlen) -1 ; i >=0; i--){
         printf("%02x", x->a[i])
     }
+    printf("\n");
 
     #elif size_of_word == 8
     // Case 3 : word is unsigned long long 
     for  (int i = (x->wordlen) -1 ; i >=0; i--){
         printf("%016x", x->a[i])
     }
+    printf("\n");
+
     #endif
 }
 
@@ -135,6 +139,31 @@ void array_rand(word* dst, int wordlen)
         cnt--;
     }
 }
+/*
+// Only for Testing
+void bigint_gen_rand1(bigint** x, int sign, int wordlen)
+{
+    bigint_create(x, wordlen);
+    (*x)->sign = sign;
+    array_rand1((*x)->a, wordlen);
+
+    bigint_refine(*x);
+}
+
+void array_rand1(word* dst, int wordlen)
+{
+    byte* p = (byte*)dst;
+    int cnt = wordlen * sizeof(word);
+    srand(time(NULL)+1);                      // Seed = Current time
+    // srand(0);
+    while(cnt > 0)
+    {
+        *p = rand() & 0xff;                 // rand() is not safe, use "srand(time(NULL))",  
+        p++;
+        cnt--;
+    }
+}
+*/
 
 // Set one, Set Zero //
 void bigint_set_one(bigint** x)
@@ -178,3 +207,46 @@ bool IsOne(bigint* x)
     return true;
 }
 
+// Compare Two Bigint
+int CompareABS(bigint* x, bigint* y)
+{
+    int n = x->wordlen;
+    int m = y->wordlen;
+
+    // Case: A > B
+    if (n > m)
+        return 1;
+
+    // Case: A < B
+    if (n < m)
+        return -1;
+    
+    for(int i = n - 1; i >= 0; i--){
+        
+        if (x->a[i] > y->a[i])
+            return 1;
+        
+        if (x->a[i] < y->a[i])
+            return -1;
+
+    }
+
+    return 0;
+}
+
+int Compare(bigint* x, bigint* y)
+{
+    if (x->sign == NON_NEGATVE && y->sign == NEGATIVE)
+        return 1;
+
+    if (x->sign == NEGATIVE && y->sign == NON_NEGATVE)
+        return -1;
+    
+    int ret = CompareABS(x, y);
+
+    if (x->sign == NON_NEGATVE)
+        return ret;
+    
+    return ret * (-1);
+    
+}
