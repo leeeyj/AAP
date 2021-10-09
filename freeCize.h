@@ -6,7 +6,7 @@
 
 #define size_of_word 4
 #define NON_NEGATVE 0
-
+#define NEGATIVE 1
 typedef char byte;
 
 #if size_of_word == 1
@@ -48,6 +48,9 @@ void bigint_refine(bigint* x);
 // generate random bigint
 void bigint_gen_rand(bigint** x, int sign, int wordlen);
 void array_rand(word* dst, int wordlen);
+// Only for Testing generate random bigint
+// void bigint_gen_rand1(bigint** x, int sign, int wordlen);
+// void array_rand1(word* dst, int wordlen);
 
 // Assign Bigint 
 void bigint_assign(bigint** y, bigint* x);
@@ -59,3 +62,7 @@ void bigint_set_zero(bigint** x);
 // IsZero? IsOne?
 bool IsZero(bigint* x);
 bool IsOne(bigint* x);
+
+// Compare Two Bigint
+int CompareABS(bigint* x, bigint* y);
+int Compare(bigint* x, bigint* y);
