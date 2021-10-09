@@ -139,6 +139,7 @@ void array_rand(word* dst, int wordlen)
         cnt--;
     }
 }
+
 /*
 // Only for Testing
 void bigint_gen_rand1(bigint** x, int sign, int wordlen)
@@ -250,3 +251,5 @@ int Compare(bigint* x, bigint* y)
     return ret * (-1);
     
 }
+
+
