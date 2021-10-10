@@ -42,6 +42,7 @@ int main()
     // Test deleting bigint
     bigint_delete(&A);
     bigint_delete(&B);
+    bigint_delete(&sum);
     //
 
     return 0;
