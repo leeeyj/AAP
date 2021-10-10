@@ -21,10 +21,14 @@ int main()
     //
 
     // Test generate random bigint 
-    // bigint_gen_rand(&A, NON_NEGATVE, 2);
-    // bigint_gen_rand1(&B, NON_NEGATVE, 2);
-    // show_bigint_hex(A);
-    // show_bigint_hex(B);
+    bigint_gen_rand(&A, NON_NEGATVE, 2);
+    bigint_gen_rand1(&B, NON_NEGATVE, 2);
+    show_bigint_hex(A);
+    show_bigint_hex(B);
+    printf("\n");
+    bigint* sum;
+    sum = ADDC(A, B);
+    show_bigint_hex(sum);
     // Test compare two bigint
     // if (Compare(A, B) == 1)
     //     printf("A > B");
@@ -36,8 +40,8 @@ int main()
     //
 
     // Test deleting bigint
-    // bigint_delete(&A);
-    // bigint_delete(&B);
+    bigint_delete(&A);
+    bigint_delete(&B);
     //
 
     return 0;
