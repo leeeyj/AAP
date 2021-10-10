@@ -66,7 +66,12 @@ bool IsOne(bigint* x);                  // ???
 // Compare Two Bigint
 int CompareABS(bigint* x, bigint* y);           // Compare Absolute two integer 
 int Compare(bigint* x, bigint* y);              // Compare two integer
+                                                /* 
+                                                    Compare(A, B) {
+                                                        return 1 : A > B
+                                                        return 0 : A = B
+                                                        return -1 : A < B    
+                                                    }
+                                                */
 
 
-
- 
