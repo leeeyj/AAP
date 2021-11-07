@@ -23,12 +23,27 @@ int main()
     // Test generate random bigint 
     bigint_gen_rand(&A, NON_NEGATVE, 2);
     bigint_gen_rand1(&B, NON_NEGATVE, 2);
+    
+    printf("A : ");
     show_bigint_hex(A);
+    
+    printf("B : ");
     show_bigint_hex(B);
     printf("\n");
+    
     bigint* sum;
     sum = ADDC(A, B);
+    printf("Sum : ");
     show_bigint_hex(sum);
+    
+    // printf("Left Shift 163 : ");
+    // LeftShift(sum, 163);
+    // show_bigint_hex(sum);
+    
+    printf("Right Shift 50 : ");
+    RightShift(sum, 50);
+    show_bigint_hex(sum);
+
     // Test compare two bigint
     // if (Compare(A, B) == 1)
     //     printf("A > B");

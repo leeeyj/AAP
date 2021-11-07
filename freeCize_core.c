@@ -252,4 +252,84 @@ int Compare(bigint* x, bigint* y)
     
 }
 
+void LeftShift(bigint* A, int r)
+{   
+    // Case1 (r = WordBitLen * k)
+    if (r % WordBitLen == 0){
+        A->a = (word*)realloc(A->a, sizeof(word) * (r / WordBitLen + A->wordlen));
+
+        memmove(&(A->a[r / WordBitLen]), &(A->a[0]), sizeof(word) * A->wordlen);
+        A->wordlen += r / WordBitLen;
+        for (int i = 0; i < r / WordBitLen; i++){
+            A->a[i] = 0;
+        }
+        bigint_refine(A);
+    } 
+
+    // Case 2 (r = WordBitLen * k + r')
+    if (r % WordBitLen != 0){
+        A->a = (word*)realloc(A->a, sizeof(word) * (r / WordBitLen + A->wordlen + 1));
+
+        word t1 = A->a[0] >> (WordBitLen - (r % WordBitLen)); 
+        A->a[0] = A->a[0] << (r % WordBitLen);
+
+        for (int i = 1; i < A->wordlen; i++){
+            word t2 = A->a[i] >> (WordBitLen - (r % WordBitLen)); 
+            A->a[i] = (A->a[i] << (r % WordBitLen)) | t1;
+            t1 = t2;
+            t2 = 0;
+        }
+        A->a[A->wordlen] = t1;
+        t1 = 0; 
+        
+        memmove(&(A->a[r / WordBitLen]), &(A->a[0]), sizeof(word) * (A->wordlen + 1));
+
+        A->wordlen += (r / WordBitLen + 1);
+        for (int i = 0; i < (r / WordBitLen); i++){
+            A->a[i] = 0;
+        }
+        bigint_refine(A);
+    }
+    
+}
+
+void RightShift(bigint* A, int r)
+{   
+    // Case1 (r >= WordBitLen * A->wordlen)
+    if (r >= (WordBitLen * A->wordlen)){
+            (word*)realloc(A->a, sizeof(word));
+            A->a[0] = 0;
+            // Bigint Refine X
+    }
+
+    // Case2 (r = WordBitLen * k)
+    if (r % WordBitLen == 0){
+        memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * (A->wordlen - r / WordBitLen));
+        for (int i = A->wordlen - r / WordBitLen; i < A->wordlen; i++){
+            A->a[i] = 0;
+        }
+        bigint_refine(A);
+    }
+
+    // Case3 (r = WordBitLen * k + r')
+    if (r % WordBitLen != 0){
+        word t1 = A->a[A->wordlen - 1] << (WordBitLen - (r % WordBitLen));
+        A->a[A->wordlen - 1] = A->a[A->wordlen - 1] >> (r % WordBitLen);
+        
+        for (int i = A->wordlen - 2; i >= r / WordBitLen; i--){
+            word t2 = A->a[i] << (WordBitLen - (r % WordBitLen));
+            A->a[i] = t1 | (A->a[i] >> (r % WordBitLen));
+            t1 = t2;
+            t2 = 0;
+        }
+        t1 = 0;
+
+        memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * (A->wordlen - r / WordBitLen));
+        for (int i = A->wordlen - r / WordBitLen; i < A->wordlen; i++){
+            A->a[i] = 0;
+        }
+        bigint_refine(A);
+
+    }
+}
 

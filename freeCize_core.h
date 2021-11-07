@@ -74,4 +74,6 @@ int Compare(bigint* x, bigint* y);              // Compare two integer
                                                     }
                                                 */
 
-
+// Left/Right shift Bigint 
+void LeftShift(bigint* A, int r);
+void RightShift(bigint* A, int r); 
