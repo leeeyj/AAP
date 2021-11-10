@@ -102,7 +102,7 @@ void bigint_refine(bigint* x)
     if (x == NULL)
         return;
     
-    // new_wordlen에 wordlen을 대입
+    // new_wordlen에 x의 word 길이를 대입
     // new_wordlen이 1보다 클 경우, a 배열의 크기
     int new_wordlen = x->wordlen;
     while(new_wordlen > 1){
@@ -111,13 +111,13 @@ void bigint_refine(bigint* x)
         new_wordlen--;
     }
 
-    //wordlen과 new_wordlen 값이 다를경우, 이미 할당한 공간의 크기를 (2*new_wordlen)byte로 바꿈
+    //x의 word 길이와 new_wordlen 값이 다를경우, 이미 할당한 공간의 크기를 (2*new_wordlen)byte로 바꿈
     if (x->wordlen != new_wordlen){
         x->wordlen = new_wordlen;
         x->a = (word*)realloc(x->a, sizeof(word)*new_wordlen);  
     }
 
-    //wordlen의 값이 1이고 a[0]의 값이 NULL일 경우, sign은 음이 아닌 정수로 설정
+    //x의 word 길이의 값이 1이고 a[0]의 값이 NULL일 경우, sign은 음이 아닌 정수로 설정
     if((x->wordlen == 1) && (x->a[0] == 0x0))
         x->sign = NON_NEGATVE;
 }
@@ -125,12 +125,13 @@ void bigint_refine(bigint* x)
 // bigint 배정
 void bigint_assign(bigint** y, bigint* x)
 {
-    // y의 값이 NULL이 아닐 경우, 계산 삭제 함수 실행
+    // y의 값이 NULL이 아닐 경우, 계산 삭제 함수 실행(bigint y를 비움)
     if(*y != NULL)
         bigint_delete(y);
     
-    // y의 값이 NULL일 경우, 계산 함수 실행
-    // y의 sign 값을 x의 sign 값에 대입
+    // y를 x의 word 길이만큼 새로 만들고
+    // y에 x의 부호 할당 (음수, 양수 판단)
+    // array_copy(y의 word 배열의 시작주소, x의 word 배열의 시작 주소 위치, 얼만큼 복사?)
     bigint_create(y, x->wordlen);
     (*y)->sign = x->sign;
     array_copy((*y)->a, x->a, x->wordlen);
@@ -140,7 +141,7 @@ void bigint_assign(bigint** y, bigint* x)
 void bigint_gen_rand(bigint** x, int sign, int wordlen)
 {
     //bigint 계산 함수를 실행한 후
-    //x의 sign 값을 sign 값에 대입
+    //x에 부호 할당
     //x에 a값을 대입하여 array_rand 함수 실행
     bigint_create(x, wordlen);
     (*x)->sign = sign;
@@ -155,6 +156,11 @@ void array_rand(word* dst, int wordlen)
     int cnt = wordlen * sizeof(word);
     srand(time(NULL));                      // Seed = Current time
     // srand(0);
+
+    //cnt가 0보다 클 경우
+    //난수와 0xff와 AND 연산한 값인 p의 주소를
+    //1씩 늘려서 저장하고
+    //cnt의 값은 1씩 줄여서 저장
     while(cnt > 0)
     {
         *p = rand() & 0xff;                 // rand() is not safe, use "srand(time(NULL))",  
@@ -231,9 +237,11 @@ bool IsOne(bigint* x)
     return true;
 }
 
-// Compare Two Bigint
+// 두 개의 bigint를 비교
 int CompareABS(bigint* x, bigint* y)
 {
+    //n은 x의 word 길이 값
+    //m은 y의 word 길이 값
     int n = x->wordlen;
     int m = y->wordlen;
 
@@ -246,13 +254,11 @@ int CompareABS(bigint* x, bigint* y)
         return -1;
     
     for(int i = n - 1; i >= 0; i--){
-        
         if (x->a[i] > y->a[i])
             return 1;
-        
+
         if (x->a[i] < y->a[i])
             return -1;
-
     }
 
     return 0;
@@ -260,14 +266,18 @@ int CompareABS(bigint* x, bigint* y)
 
 int Compare(bigint* x, bigint* y)
 {
+    //x가 음이 아닌 정수이고, y가 음수일 경우, 1 리턴
     if (x->sign == NON_NEGATVE && y->sign == NEGATIVE)
         return 1;
 
+    //x가 음수이고, y가 음이 아닌 정수일 경우, -1 리턴
     if (x->sign == NEGATIVE && y->sign == NON_NEGATVE)
         return -1;
     
+    //두 개의 bigint x와 y의 값을 비교하고 리턴 값을 ret으로 정의
     int ret = CompareABS(x, y);
 
+    //x가 음이 아닌 정수일 때, ret 값 리턴 
     if (x->sign == NON_NEGATVE)
         return ret;
     
