@@ -22,7 +22,7 @@ void bigint_create(bigint** x, int wordlen)
     }
 }
 
-//bigint 계산 함수 삭제
+//bigint 계산 삭제 함수
 void bigint_delete(bigint** x)  
 {
     //에러 방지
@@ -125,11 +125,11 @@ void bigint_refine(bigint* x)
 // bigint 배정
 void bigint_assign(bigint** y, bigint* x)
 {
-    // y의 값이 NULL이 아닐 경우, 계산 함수 삭제
+    // y의 값이 NULL이 아닐 경우, 계산 삭제 함수 실행
     if(*y != NULL)
         bigint_delete(y);
     
-    // y의 값이 NULL일 경우, 계산 함수 생성
+    // y의 값이 NULL일 경우, 계산 함수 실행
     // y의 sign 값을 x의 sign 값에 대입
     bigint_create(y, x->wordlen);
     (*y)->sign = x->sign;
@@ -139,6 +139,9 @@ void bigint_assign(bigint** y, bigint* x)
 // bigint의 랜덤값 생성
 void bigint_gen_rand(bigint** x, int sign, int wordlen)
 {
+    //bigint 계산 함수를 실행한 후
+    //x의 sign 값을 sign 값에 대입
+    //x에 a값을 대입하여 array_rand 함수 실행
     bigint_create(x, wordlen);
     (*x)->sign = sign;
     array_rand((*x)->a, wordlen);
