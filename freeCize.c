@@ -21,7 +21,7 @@ bigint* ADDC(bigint* x, bigint* y)
 
     word C = 0;                                 // C is (x[j] + y[j]) mod 2 ^ WordBitLen
     bigint* sum = NULL;
-    bigint_create(&sum, x->wordlen + 1);        // To save A + B, �ִ� max(n, m) + 1 wordlen need
+    bigint_create(&sum, x->wordlen + 1);        // To save A + B, ÃÖ´ë max(n, m) + 1 wordlen need
     int carry = 0;
 
 
@@ -39,6 +39,8 @@ bigint* ADDC(bigint* x, bigint* y)
     bigint_refine(sum);                 // reallocation bigint sum
     return sum;
 }
+
+//SUBTRACT//
 
 int SUB_AbB(word* A, word* B, int* b, word* C)
 {
@@ -65,7 +67,7 @@ bigint* SUBC(bigint* A, bigint* B)
     bigint_create(&sub, A->wordlen + 1);       
     int count = 0;
 
-    for (int j = 0; j < A->wordlen; j++) {                       // Updating carry and C
+    for (int j = 0; j < A->wordlen; j++) {                       
         SUB_AbB(&(A->a[j]), &(B->a[j]), &b, &C);
         sub->a[j] = C;
         C = 0;
