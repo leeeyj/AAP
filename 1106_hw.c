@@ -210,7 +210,7 @@ void bigint_set_zero(bigint** x)
     (*x)->a[0] = 0x00;    
 }
 
-// IsZero? IsOne? 이거 뭐하는 함수죠...? //
+// IsZero? IsOne? 이거 뭐하는 함수죠? //
 bool IsZero(bigint* x)
 {
     if (x->sign == 1 || x->a[0] != 0)
