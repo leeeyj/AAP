@@ -41,16 +41,37 @@ void bigint_set_by_array(bigint** x, int sign, word* t, int wordlen)    // Setti
     array_copy((*x)->a, t, wordlen);
 }
 
+#if 0 
+//first made
 void bigint_set_by_string(bigint** x, int sign, char* str, int base)    // Setting bigint by string //base mean is a of x^a 
 {
     bigint_create(x, strlen(str));
     (*x)->sign = sign;
     memset((*x)->a,strtoul(str, NULL, base),strlen(str)*sizeof(word));
 }
+#endif
+void bigint_set_by_string(bigint** x, int sign, char* str, int base)    // Setting bigint by string //base mean is a of x^a 
+{
+    int size = strlen(str);
+    int byte_size = WordBitLen>>3;
+    size = size/byte_size;
+    if(size%byte_size != 0 )
+    {
+        size++;
+    }
+    bigint_create(x, size);
+    (*x)->sign = sign;
+    for(int i=0;i<size*byte_size;i+=byte_size)
+    {
+        // memset((*x)->a,strtoul(str, NULL, base),strlen(str)*sizeof(word));
+        //please your opinion. -keonhee
+    }
+}
 
 // Show(print) Bigint //
 void show_bigint_hex(bigint *x)
 {   
+    printf("0x");
     #if WordBitLen == 32
     // Case 1: word is unsigned int
     for (int i = (x->wordlen) - 1; i >= 0; i--){
@@ -77,13 +98,29 @@ void show_bigint_hex(bigint *x)
 
 void show_bigint_dec(bigint* x)
 {
-    // How...?
+    // we need to make bigint to decimal func
+    // idk.... sorry
+
 }
 
 void show_bigint_bin(bigint* x)
 {
-    // How...?
+    int len = (*x)->wordlen;
+    printf("0b")
+    for(int i=(len-1);i>0;i--)
+    {
+        word t = (*x)->a[i];
+        for(int j=0;j<WordBitLen;j++)
+        {
+            if((t>>j)&(0x1) ==1)
+                printf("1");
+            else
+                printf("0"); 
+        }
+    }
+    printf("\n");
 }
+
 
 // Refine Bigint //
 void bigint_refine(bigint* x)
