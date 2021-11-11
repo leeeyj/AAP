@@ -40,8 +40,8 @@ int main()
     // LeftShift(sum, 163);
     // show_bigint_hex(sum);
     
-    printf("Right Shift 50 : ");
-    RightShift(sum, 50);
+    printf("Right Shift 100 : ");
+    RightShift(sum, 100);
     show_bigint_hex(sum);
 
     // Test compare two bigint
