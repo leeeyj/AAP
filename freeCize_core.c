@@ -41,9 +41,31 @@ void bigint_set_by_array(bigint** x, int sign, word* t, int wordlen)    // Setti
     array_copy((*x)->a, t, wordlen);
 }
 
-void bigint_set_by_string(bigint** x, int sign, char* str, int base)    // Setting bigint by string
+#if 0 
+//first made
+void bigint_set_by_string(bigint** x, int sign, char* str, int base)    // Setting bigint by string //base mean is a of x^a 
 {
-    // string how...?
+    bigint_create(x, strlen(str));
+    (*x)->sign = sign;
+    memset((*x)->a,strtoul(str, NULL, base),strlen(str)*sizeof(word));
+}
+#endif
+void bigint_set_by_string(bigint** x, int sign, char* str, int base)    // Setting bigint by string //base mean is a of x^a 
+{
+    int size = strlen(str);
+    int byte_size = WordBitLen>>3;
+    size = size/byte_size;
+    if(size%byte_size != 0 )
+    {
+        size++;
+    }
+    bigint_create(x, size);
+    (*x)->sign = sign;
+    for(int i=0;i<size*byte_size;i+=byte_size)
+    {
+        // memset((*x)->a,strtoul(str, NULL, base),strlen(str)*sizeof(word));
+        //please your opinion. -keonhee
+    }
 }
 
 // Show(print) Bigint //
@@ -75,12 +97,26 @@ void show_bigint_hex(bigint *x)
 
 void show_bigint_dec(bigint* x)
 {
-    // How...?
+    // we need to make bigint to decimal func
+    // idk.... sorry
 }
 
 void show_bigint_bin(bigint* x)
 {
-    // How...?
+    int len = x->wordlen;
+    printf("0b");
+    for(int i=(len-1);i>0;i--)
+    {
+        word t = x->a[i];
+        for(int j=0;j<WordBitLen;j++)
+        {
+            if((t>>j)&(0x1) ==1)
+                printf("1");
+            else
+                printf("0"); 
+        }
+    }
+    printf("\n");
 }
 
 // Refine Bigint //
@@ -108,12 +144,12 @@ void bigint_refine(bigint* x)
 // Assign Bigint //
 void bigint_assign(bigint** y, bigint* x)
 {
-    if(*y != NULL)
-        bigint_delete(y);
+    if(*y != NULL)              // bigint y가 비어있지 않다면..?
+        bigint_delete(y);       // bigint y를 비우고 
     
-    bigint_create(y, x->wordlen);
-    (*y)->sign = x->sign;
-    array_copy((*y)->a, x->a, x->wordlen);
+    bigint_create(y, x->wordlen);       // y를 x의 word길이 만큼 새로 만들기  
+    (*y)->sign = x->sign;               // y에 x의 부호 할당 (음수, 양수 판단)
+    array_copy((*y)->a, x->a, x->wordlen);      // array_copy(y의 word 배열의 시작 주소, x의 word배열의 시작 주소 위치, 얼만큼 복사?)
 }
 
 // Generate Random Bigint //
