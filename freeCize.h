@@ -6,4 +6,6 @@ bigint *ADDC(bigint* x, bigint* y);                         // Addition of Same 
 // ADD();                                                   // Addition of Two Integers
 
 // Bigint Subtraction
-// ...
+int SUB_AbB(word* A, word* B, int* b, word* C);
+bigint* SUBC(bigint* A, bigint* B);
+
