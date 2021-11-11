@@ -33,7 +33,7 @@ int main()
         pName = PyUnicode_FromString("test1");                              // Python File name -> test1.py 
         pModule = PyImport_Import(pName);                                   // Import Python File
         pFunc = PyObject_GetAttrString(pModule, "test_func");               // test1.py에 있는 test_func (함수 이름)
-        pArg = Py_BuildValue("(II)", 1, 2);                                 // 매개변수 설정
+        pArg = Py_BuildValue("II", 1, 2);                                 // 매개변수 설정
         if (PyCallable_Check(pFunc)) {                                      // 함수가 잘 불러져 왔는지 확인
             pValue = PyObject_CallObject(pFunc, pArg);                      // 파이썬 test_func 함수 실행 
         }
