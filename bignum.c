@@ -31,35 +31,52 @@ int main()
     show_bigint_hex(B);
     printf("\n");
     
-    bigint* sum;
-    sum = ADDC(A, B);
+    // Addition Testing
+    bigint* sum = NULL;
+    ADDC(A, B, &sum);
     printf("Sum : ");
     show_bigint_hex(sum);
+    printf("\n");
     
-    // printf("Left Shift 163 : ");
-    // LeftShift(sum, 163);
-    // show_bigint_hex(sum);
-    
-    printf("Right Shift 100 : ");
-    RightShift(sum, 100);
-    show_bigint_hex(sum);
-
     // Test compare two bigint
     // if (Compare(A, B) == 1)
     //     printf("A > B");
-    // else if (Compare(A, B) == -1)
+    // else if (Compare(A, B) == -1){
     //     printf("A < B");
+    //     bigint* swap;
+    //     swap = A;
+    //     A = B;
+    //     B = swap;
+    // }        
     // else
-    //     printf(" A = B");
-    // show_bigint_hex(A);
-    //
+        // printf("A = B");
+
+    // Subtraction Testing 
+    // bigint* sub = NULL;
+    // SUBC(A, B, &sub);
+    // printf("\n");
+    // show_bigint_hex(sub);
+
+    // Left Shift Testing 
+    // printf("Left Shift 163 : ");
+    // LeftShift(sum, 163);
+    // show_bigint_hex(sum);
+
+    // Right Shift Testing 
+    // printf("Right Shift 100 : ");
+    // RightShift(sum, 100);
+    // show_bigint_hex(sum);
+
+    // Reduction Testing 
+    Reduction(sum, 33);
+    printf("sum mod 2 ^ 65 : ");
+    show_bigint_hex(sum);
 
     // Test deleting bigint
     bigint_delete(&A);
     bigint_delete(&B);
     bigint_delete(&sum);
     //
-
     return 0;
 }
 
