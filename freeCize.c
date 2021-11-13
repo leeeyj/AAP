@@ -12,7 +12,7 @@ int ADD_ABC(word* x, word* y, int* c, word* C)
     return *c = 0;
 }
 
-bigint *ADDC(bigint* x, bigint* y)
+void ADDC(bigint* x, bigint* y, bigint** z)
 {   
     y->a = (word*)realloc(y->a, sizeof(word)*(x->wordlen));
     for (int j = y->wordlen; j < x->wordlen; j++){
@@ -20,7 +20,7 @@ bigint *ADDC(bigint* x, bigint* y)
     }
     
     word C = 0;                                 // C is (x[j] + y[j]) mod 2 ^ WordBitLen
-    bigint* sum = NULL;
+    bigint* sum = NULL;                         // a + b 저장할 sum 생성 
     bigint_create(&sum, x->wordlen + 1);        // To save A + B, 최대 max(n, m) + 1 wordlen need
     int carry = 0;
 
@@ -32,11 +32,12 @@ bigint *ADDC(bigint* x, bigint* y)
     
     if (carry == 1){                    // If last carry is 1, sum = [1][word][word]...[word]
         sum->a[sum->wordlen - 1] = 1;
-        return sum;
     }
 
     bigint_refine(sum);                 // reallocation bigint sum
-    return sum;
+
+    bigint_assign(z, sum);    
+    bigint_delete(&sum);
 }
 
 //SUBTRACT//
@@ -53,7 +54,7 @@ int SUB_AbB(word* A, word* B, int* b, word* C)
     return *b;
 }
 
-bigint* SUBC(bigint* A, bigint* B)
+void SUBC(bigint* A, bigint* B, bigint** z)
 {
     B->a = (word*)realloc(B->a, sizeof(word) * (B->wordlen));
     for (int j = B->wordlen; j < A->wordlen; j++) {
@@ -73,5 +74,6 @@ bigint* SUBC(bigint* A, bigint* B)
     }
 
     bigint_refine(sub);
-    return sub;
+    bigint_assign(z, sub);
+    bigint_delete(&sub);
 }
