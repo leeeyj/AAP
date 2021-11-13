@@ -20,7 +20,7 @@ typedef unsigned long long word;
 // typedef unsigned int word;
 // typedef unsigned char word;
 // typedef unsigned long long word;
-
+ 
 // BigInt struct
 typedef struct{
     int sign;           // Negative or Positive
