@@ -220,9 +220,13 @@ void bigint_set_zero(bigint** x)
 // IsZero? IsOne? 이거 뭐하는 함수죠...? //
 bool IsZero(bigint* x)
 {
+    /*
     if (x->sign == 1 || x->a[0] != 0)
         return false;
-    
+    */
+    if (x->a[0] != 0)
+        return false;
+
     for (int i = (x->wordlen) - 1; i >= 1; i--){
         if (x->a[i] != 0)
             return false;
