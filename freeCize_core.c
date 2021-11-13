@@ -331,15 +331,19 @@ void LeftShift(bigint* A, int r)
 
 void RightShift(bigint* A, int r)
 {   
+    int o = WordBitLen * A->wordlen; 
     // Case1 (r >= WordBitLen * A->wordlen)
-    if (r >= (WordBitLen * A->wordlen)){
-            (word*)realloc(A->a, sizeof(word));
-            A->a[0] = 0;
+    if (r >= o){
+            bigint* new = NULL;
+            bigint_create(&new, 1);
+            new->a[0] = 0;
+            bigint_assign(&A, new);
+            bigint_delete(&new);
             // Bigint Refine X
     }
 
     // Case2 (r = WordBitLen * k)
-    if (r % WordBitLen == 0){
+    if (r % WordBitLen == 0 && r < o){
         memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * (A->wordlen - r / WordBitLen));
         for (int i = A->wordlen - r / WordBitLen; i < A->wordlen; i++){
             A->a[i] = 0;
@@ -348,7 +352,7 @@ void RightShift(bigint* A, int r)
     }
 
     // Case3 (r = WordBitLen * k + r')
-    if (r % WordBitLen != 0){
+    if (r % WordBitLen != 0 && r < o){
         word t1 = A->a[A->wordlen - 1] << (WordBitLen - (r % WordBitLen));
         A->a[A->wordlen - 1] = A->a[A->wordlen - 1] >> (r % WordBitLen);
         
@@ -369,3 +373,38 @@ void RightShift(bigint* A, int r)
     }
 }
 
+void Reduction(bigint* A, int r)
+{
+    // case 1 : r >= WordBitLen * wordlen
+    // no needed
+
+    int k = r / WordBitLen;
+    int len = A->wordlen;
+    // case 2: r = WordBitLen * k, k < wordlen
+    if (k < len && r % WordBitLen == 0){
+        bigint* new = NULL;
+        bigint_create(&new, k);
+        for(int i = 0; i < k; i++){
+            new->a[i] = A->a[i];
+        }
+        bigint_refine(new);
+        bigint_assign(&A, new);
+        bigint_delete(&new);
+    }
+
+    // case 3: r = WordBitLen * k + r, same
+    if (k < len && r % WordBitLen < WordBitLen){
+        bigint* new = NULL;
+        bigint_create(&new, k + 1);
+        for (int i = 0; i < k; i++){
+            new->a[i] = A->a[i];
+        }
+
+        word q = (1 << (r % WordBitLen)) - 1;
+        new->a[k] = A->a[k] & q;
+        bigint_refine(new);
+        bigint_assign(&A, new);
+        bigint_delete(&new);
+    }
+        
+}
