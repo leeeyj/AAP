@@ -6,7 +6,7 @@ void ADDC(bigint* x, bigint* y, bigint** z);                // Addition of Same 
 void ADD(bigint* x, bigint* y, bigint** z);                                                   // Addition of Two Integers
 
 // Bigint Subtraction
-int SUB_AbB(word* A, word* B, int* b, word* C);
+void SUB_AbB(word* A, word* B, int* b, word* C);
 void SUBC(bigint* A, bigint* B, bigint** z);
 void SUB(bigint* x, bigint* y, bigint** z);
 
