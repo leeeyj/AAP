@@ -79,3 +79,111 @@ bigint* SUBC(bigint* A, bigint* B)
     bigint_refine(sub);
     return sub;
 }
+
+
+bigint* ADD(bigint* x, bigint* y)
+{
+    if (x->wordlen == 0)
+        return y;
+    if (y->wordlen == 0)
+        return x;
+
+    if ((x->sign == NON_NEGATVE) & (y->sign == NEGATIVE))
+    {
+
+        // we need to make absolute func
+        bigint** tmp = NULL;
+        bigint_assign(tmp, y);
+        (*tmp)->sign = NON_NEGATVE;
+        return SUB(x, (*tmp));
+    }
+    if ((x->sign == NEGATIVE) & (y->sign == NON_NEGATVE))
+    {
+
+        // we need to make absolute func
+        bigint** tmp = NULL;
+        bigint_assign(tmp, x);
+        (*tmp)->sign = NON_NEGATVE;
+        return SUB(x, (*tmp));
+    }
+    if ((x->wordlen) >= (y->wordlen))
+    {
+        return ADDC(x, y);
+    }
+    else
+        return ADDC(y, x);
+
+    return -1;
+}
+
+
+bigint* SUB(bigint* x, bigint* y)
+{
+    if (x->wordlen == 0)
+    {
+        bigint** tmp = NULL;
+        bigint_assign(tmp, y);
+        (*tmp)->sign = (y->sign)^0x1;
+        return *tmp;
+    }
+    if (y->wordlen == 0)
+        return x;
+    if (Compare(x,y) == 0) 
+        return 0;
+
+    if ((y->sign == NON_NEGATVE) & (Compare(x, y) != -1))
+        return SUBC(x, y);
+    if ((x->sign == NON_NEGATVE) & (Compare(x, y) == -1))
+    {
+        bigint** tmp = NULL;
+        bigint_assign(tmp, SUBC(y, x));
+        (*tmp)->sign = ((*tmp)->sign) ^ 0x1;
+        return *tmp;
+    }
+
+    if ((Compare(x, y) != -1) & (x->sign == NEGATIVE))
+    {
+        bigint** tmp1 = NULL;
+        bigint_assign(tmp1, x);
+        (*tmp1)->sign = NON_NEGATVE;
+        bigint** tmp2 = NULL;
+        bigint_assign(tmp2, y);
+        (*tmp2)->sign = NON_NEGATVE;
+        return SUBC(tmp1, tmp2);
+    }
+
+    if ((Compare(x, y) == -1) & (y->sign == NEGATIVE))
+    {
+        bigint** tmp1 = NULL;
+        bigint_assign(tmp1, x);
+        (*tmp1)->sign = NON_NEGATVE;
+        bigint** tmp2 = NULL;
+        bigint_assign(tmp2, y);
+        (*tmp2)->sign = NON_NEGATVE;
+
+        bigint** tmp3 = NULL;
+        bigint_assign(tmp3, SUBC(tmp1, tmp2));
+        (*tmp3)->sign ^= 0x1;
+        return *tmp3;
+    }
+
+    if ((x->sign == NON_NEGATVE) & (y->sign == NEGATIVE))
+    {
+        bigint** tmp1 = NULL;
+        bigint_assign(tmp1, y);
+        (*tmp1)->sign = NON_NEGATVE;
+        return ADD(x, *tmp1);
+    }
+    else
+    {
+        bigint** tmp1 = NULL;
+        bigint_assign(tmp1, x);
+        (*tmp1)->sign = NON_NEGATVE;
+        
+        bigint** tmp2 = NULL;
+        bigint_assign(tmp2, ADD(tmp1, y));
+        (*tmp2)->sign ^= 0x1;
+        return *tmp2;
+    }
+    return -1;
+}
