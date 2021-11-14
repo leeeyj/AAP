@@ -19,7 +19,6 @@ void ADD_ABC(word* x, word* y, int* c, word* C)
 void ADDC(bigint* x, bigint* y, bigint** z)
 {   
     y->a = (word*)realloc(y->a, sizeof(word)*(x->wordlen));
-    // (word*)realloc(y->a, sizeof(word)*(x->wordlen));
     for (int j = y->wordlen; j < x->wordlen; j++){
         y->a[j] = 0;
     }
@@ -40,54 +39,73 @@ void ADDC(bigint* x, bigint* y, bigint** z)
     }
 
     bigint_refine(sum);                 // reallocation bigint sum
-    // bigint_refine(y);
+    bigint_refine(y);
     bigint_assign(z, sum);    
     bigint_delete(&sum);
 }
 
 void ADD(bigint* x, bigint* y, bigint** z)
-{
-    if (IsZero(x)) bigint_assign(z, y);
-    if (IsZero(y)) bigint_assign(z, x);
+{   
+    if (IsZero(x)){
+        bigint_assign(z, y);
+        return;
+    }
+
+    if (IsZero(y)){
+        bigint_assign(z, x);
+        return;
+    } 
+
     if ((!IsZero(x) && x->sign == NON_NEGATVE) && (!IsZero(y) && y->sign == NEGATIVE)){
         y->sign = NON_NEGATVE;
         SUB(x, y, z);
+        y->sign = NEGATIVE;
+        return;
     }
+
     if ((!IsZero(y) && y->sign == NON_NEGATVE) && (!IsZero(x) && x->sign == NEGATIVE)){
         x->sign = NON_NEGATVE;
         SUB(y, x, z);
+        x->sign = NEGATIVE;
+        return;
     }
-    if (x->wordlen >= y->wordlen) ADDC(x, y, z);
-    if (x->wordlen < y->wordlen) ADDC(y, x, z);
 
+    if (x->wordlen >= y->wordlen){
+        ADDC(x, y, z);
+        return;
+    }
+
+    if (x->wordlen < y->wordlen){
+        ADDC(y, x, z);
+        return;
+    } 
 }
 
 //SUBTRACT//
-
-int SUB_AbB(word* A, word* B, int* b, word* C)
+void SUB_AbB(word* A, word* B, int* b, word* C)
 {
+    int b_2 = 0;
     (*C) = ((*A) - (*b));              
     if ((*A) < (*b)) 
-        *b = 1;
-    //0-1?
+        b_2 = 1;
+
     if ((*C) < (*B)) 
-        *b = 1;
+        b_2 = (b_2) ^ 0x1;
     (*C) = (*C) - (*B);
-    return *b;
+    *b = b_2;
 }
 
 void SUBC(bigint* A, bigint* B, bigint** z)
 {
-    B->a = (word*)realloc(B->a, sizeof(word) * (B->wordlen));
+    B->a = (word*)realloc(B->a, sizeof(word) * (A->wordlen));
     for (int j = B->wordlen; j < A->wordlen; j++) {
         B->a[j] = 0;
     }
 
-    word b = 0;                              
+    int b = 0;                              
     word C = 0;                              
     bigint* sub = NULL;
-    bigint_create(&sub, A->wordlen + 1);       
-    int count = 0;
+    bigint_create(&sub, A->wordlen);       
 
     for (int j = 0; j < A->wordlen; j++) {                       
         SUB_AbB(&(A->a[j]), &(B->a[j]), &b, &C);
@@ -96,13 +114,14 @@ void SUBC(bigint* A, bigint* B, bigint** z)
     }
 
     bigint_refine(sub);
+    bigint_refine(B);
     bigint_assign(z, sub);
     bigint_delete(&sub);
 }
 
 void SUB(bigint* x, bigint* y, bigint** z)
 {
-
+    // 만들어주세요 :)
 }
 
 // Multiplication 
