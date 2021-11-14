@@ -44,16 +44,16 @@ bigint* ADDC(bigint* x, bigint* y)
 
 void SUB_AbB(word* A, word* B, int* b, word* C)
 {
-    *b = 0;
+    int b_2 = 0;
     (*C) = ((*A) - (*b));              
     if ((*A) < (*b)) 
-        *b = 1;
+        b_2 = 1;
     //0-1?....? what's problem..?-keon
     if ((*C) < (*B)) 
-        *b = (*b) ^ 0x1;
+        b_2 = (b_2) ^ 0x1;
     (*C) = (*C) - (*B);
-    word Temp = -1;
-    *C = (Temp+1) * (*b)*(-1) + *C;
+    *b = b_2;
+    
     //return *C;
 }
 
