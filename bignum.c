@@ -32,10 +32,17 @@ int main()
     printf("Mul : ");
     show_bigint_hex(mul);
 
+    // Subtraction Testing
+    bigint* sub = NULL;
+    SUBC(A, B, &sub);
+    printf("Sub : ");
+    show_bigint_hex(sub);
+
     // Test deleting bigint
     bigint_delete(&A);
     bigint_delete(&B);
     bigint_delete(&sum);
+    bigint_delete(&sub);
     bigint_delete(&mul);
 
 
