@@ -121,7 +121,66 @@ void SUBC(bigint* A, bigint* B, bigint** z)
 
 void SUB(bigint* x, bigint* y, bigint** z)
 {
-    // 만들어주세요 :)
+    if (IsZero(x)){
+        bigint_assign(z, y);
+        (*z)->sign = NEGATIVE; 
+        return;
+    }
+    if (IsZero(y)){
+        bigint_assign(z, x);
+        (*z)->sign = NON_NEGATVE; 
+        return;
+    }
+    if(Compare(x,y)==0){
+        bigint_set_zero(z);
+        return;
+    }
+    if((y->sign==NON_NEGATVE)&&(x->sign==NON_NEGATVE)&&(Compare(x,y) != -1) )
+    {
+        SUBC(x,y,z);
+        return;
+    }
+    if((x->sign == NON_NEGATVE)&&(y->sign==NON_NEGATVE)&&(Compare(x,y)==-1))
+    {
+        SUBC(y,x,z);
+        (*z)->sign = NEGATIVE;
+        return;
+    }
+    if((x->sign==NEGATIVE)&&(y->sign==NEGATIVE)&&(Compare(x,y)!=-1))
+    {
+        x->sign = NON_NEGATVE;
+        y->sign = NON_NEGATVE;
+        SUBC(y,x,z);
+        x->sign = NEGATIVE;
+        y->sign = NEGATIVE;
+        return;
+    }
+    if((y->sign==NEGATIVE)&&(x->sign==NEGATIVE)&&(Compare(x,y)==-1))
+    {
+        x->sign = NON_NEGATVE;
+        y->sign = NON_NEGATVE;
+        SUBC(x,y,z);
+        x->sign = NEGATIVE;
+        y->sign = NEGATIVE;
+        (*z)->sign = NEGATIVE;
+        return;
+    }
+
+    if((x->sign == NON_NEGATVE)&&(y->sign == NEGATIVE))
+    {
+        y->sign = NON_NEGATVE;
+        ADD(x,y,z);
+        y->sign = NEGATIVE;
+        return;
+    }
+    if((x->sign == NEGATIVE)&&(y->sign == NON_NEGATVE))
+    {
+        x->sign = NON_NEGATVE;
+        ADD(x,y,z);
+        x->sign = NEGATIVE;
+        (*z)->sign = NEGATIVE;
+        return;
+    }
 }
 
 // Multiplication 
@@ -169,7 +228,7 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z)
     for (int i = 0; i < x->wordlen; i++){
         for (int j = 0; j < y->wordlen; j++){
             bigint* T = NULL;
-            MUL_AB(&(x->a[i]), &(y->a[j]), &T);
+            MUL_AB(&(x->a[i]), &(y->a[j]), &T);       // 여기 수정함 11/15 AM11:50
             LeftShift(T, WordBitLen * (i + j));
             if (T->wordlen <= mul->wordlen) ADDC(mul, T, &mul);
             else ADDC(T, mul, &mul);
@@ -184,10 +243,80 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z)
 void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
 {   
     // wordlen이 충분히 길지 않으면 Naive Version으로 연산하는 것이 더 빠르다
-    if (x->wordlen < 10 | y->wordlen < 10) MULC_Naive(x, y, z);
+    if (x->wordlen <= 10 | y->wordlen <= 10){
+        MULC_Naive(x, y, z);
+        return;
+    }
     else{
+        int l = 0;
+        if (x->wordlen >= y->wordlen) l = (x->wordlen + 1) >> 1;
+        if (x->wordlen < y->wordlen) l = (y->wordlen + 1) >> 1;
+        // printf("l : %d \n", l);
+        bigint* A1 = NULL; bigint* A0 = NULL;
+        bigint* B1 = NULL; bigint* B0 = NULL;
+        bigint* T1 = NULL; bigint* T0 = NULL;
+        bigint* S1 = NULL; bigint* S0 = NULL;
+        bigint* S = NULL; bigint* R = NULL;
 
+        bigint_assign(&A1, x);
+        bigint_assign(&A0, x);
+        bigint_assign(&B1, y);
+        bigint_assign(&B0, y);
+        
+        RightShift(A1, l * WordBitLen);
+        Reduction(A0, l * WordBitLen);
+        RightShift(B1, l * WordBitLen);
+        Reduction(B0, l * WordBitLen);
+    
+        printf("A1 : "); show_bigint_hex(A1);
+        printf("A0 : "); show_bigint_hex(A0);
+        printf("B1 : "); show_bigint_hex(B1);
+        printf("B0 : "); show_bigint_hex(B0);
+        printf("\n");
 
+        
+        MULC_Karatsuba(A1, B1, &T1);
+        MULC_Karatsuba(A0, B0, &T0);
+        printf("T1 : "); show_bigint_hex(T1);
+        printf("T0 : "); show_bigint_hex(T0);
+        printf("\n");
+        
+        LeftShift(T1, 2 * l * WordBitLen);
+        ADD(T1, T0, &R);
+        RightShift(T1, 2 * l * WordBitLen);
+        printf("T1 + T0 : "); show_bigint_hex(R);
+        printf("T1 : "); show_bigint_hex(T1);
 
+        SUB(A0, A1, &S1);
+        SUB(B1, B0, &S0);
+        printf("S1 : (%d) ", S1->sign); show_bigint_hex(S1);
+        printf("S0 : (%d) ", S0->sign); show_bigint_hex(S0);
+
+        int S_sign = S1->sign ^ S0->sign;
+        S1->sign = NON_NEGATVE; S0->sign = NON_NEGATVE;
+        MULC_Karatsuba(S1, S0, &S);
+        if (S_sign == 0) S->sign = NON_NEGATVE;
+        if (S_sign == 1) S->sign = NEGATIVE;
+        printf("S : (%d) ", S->sign); show_bigint_hex(S);
+
+        ADD(S, T1, &S);
+        printf("S + T1 : (%d) ", S->sign); show_bigint_hex(S);
+        ADD(S, T0, &S);
+        printf("S + T1 + T0: (%d) ", S->sign); show_bigint_hex(S);
+
+        // Error tlqkf 
+        LeftShift(S, l * WordBitLen);
+        printf("S : (%d) ", S->sign); show_bigint_hex(S);
+
+        ADD(R, S, &R);
+        printf("R : (%d) ", R->sign); show_bigint_hex(R);
+        bigint_refine(R);
+        bigint_assign(z, R);
+        
+        bigint_delete(&A1); bigint_delete(&A0);
+        bigint_delete(&B1); bigint_delete(&B0);
+        bigint_delete(&T1); bigint_delete(&T0);
+        bigint_delete(&S1); bigint_delete(&S0);
+        bigint_delete(&S); bigint_delete(&R);
     }
 }
