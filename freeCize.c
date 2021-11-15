@@ -57,16 +57,20 @@ void ADD(bigint* x, bigint* y, bigint** z)
     } 
 
     if ((!IsZero(x) && x->sign == NON_NEGATVE) && (!IsZero(y) && y->sign == NEGATIVE)){
-        y->sign = NON_NEGATVE;
-        SUB(x, y, z);
-        y->sign = NEGATIVE;
+        bigint* y_ = NULL;
+        bigint_assign(&y_, y);
+        y_->sign = NON_NEGATVE;
+        SUB(x, y_, z);
+        bigint_delete(&y_);
         return;
     }
 
     if ((!IsZero(y) && y->sign == NON_NEGATVE) && (!IsZero(x) && x->sign == NEGATIVE)){
-        x->sign = NON_NEGATVE;
-        SUB(y, x, z);
-        x->sign = NEGATIVE;
+        bigint* x_ = NULL;
+        bigint_assign(&x_, x);
+        x_->sign = NON_NEGATVE;
+        SUB(y, x_, z);
+        bigint_delete(&x_);
         return;
     }
 
@@ -138,6 +142,7 @@ void SUB(bigint* x, bigint* y, bigint** z)
     if((y->sign==NON_NEGATVE)&&(x->sign==NON_NEGATVE)&&(Compare(x,y) != -1) )
     {
         SUBC(x,y,z);
+        (*z)->sign = NON_NEGATVE;
         return;
     }
     if((x->sign == NON_NEGATVE)&&(y->sign==NON_NEGATVE)&&(Compare(x,y)==-1))
@@ -148,37 +153,50 @@ void SUB(bigint* x, bigint* y, bigint** z)
     }
     if((x->sign==NEGATIVE)&&(y->sign==NEGATIVE)&&(Compare(x,y)!=-1))
     {
-        x->sign = NON_NEGATVE;
-        y->sign = NON_NEGATVE;
-        SUBC(y,x,z);
-        x->sign = NEGATIVE;
-        y->sign = NEGATIVE;
+        bigint* x_ = NULL;
+        bigint* y_ = NULL;
+        bigint_assign(&x_, x);
+        bigint_assign(&y_, y);    
+        x_->sign = NON_NEGATVE;
+        y_->sign = NON_NEGATVE;
+        SUBC(y_,x_,z);
+        bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
     if((y->sign==NEGATIVE)&&(x->sign==NEGATIVE)&&(Compare(x,y)==-1))
     {
-        x->sign = NON_NEGATVE;
-        y->sign = NON_NEGATVE;
+        bigint* x_ = NULL;
+        bigint* y_ = NULL;
+        bigint_assign(&x_, x);
+        bigint_assign(&y_, y);    
+        x_->sign = NON_NEGATVE;
+        y_->sign = NON_NEGATVE;
         SUBC(x,y,z);
-        x->sign = NEGATIVE;
-        y->sign = NEGATIVE;
         (*z)->sign = NEGATIVE;
+        bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
 
     if((x->sign == NON_NEGATVE)&&(y->sign == NEGATIVE))
     {
-        y->sign = NON_NEGATVE;
+        bigint* y_ = NULL;
+        bigint_assign(&y_, y);
+        y_->sign = NON_NEGATVE;
         ADD(x,y,z);
-        y->sign = NEGATIVE;
+        bigint_delete(&y_);
+
         return;
     }
     if((x->sign == NEGATIVE)&&(y->sign == NON_NEGATVE))
-    {
-        x->sign = NON_NEGATVE;
+    {   
+        bigint* x_ = NULL;
+        bigint_assign(&x_, y);
+        x_->sign = NON_NEGATVE;
         ADD(x,y,z);
-        x->sign = NEGATIVE;
-        (*z)->sign = NEGATIVE;
+        (*z)->sign = NEGATIVE;        
+        bigint_delete(&x_);
         return;
     }
 }
@@ -268,48 +286,48 @@ void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
         RightShift(B1, l * WordBitLen);
         Reduction(B0, l * WordBitLen);
     
-        printf("A1 : "); show_bigint_hex(A1);
-        printf("A0 : "); show_bigint_hex(A0);
-        printf("B1 : "); show_bigint_hex(B1);
-        printf("B0 : "); show_bigint_hex(B0);
-        printf("\n");
+        // printf("A1 : (%d)", A1->sign); show_bigint_hex(A1);
+        // printf("A0 : (%d)", A0->sign); show_bigint_hex(A0);
+        // printf("B1 : (%d)", B1->sign); show_bigint_hex(B1);
+        // printf("B0 : (%d)", B0->sign); show_bigint_hex(B0);
+        // printf("\n");
 
         
         MULC_Karatsuba(A1, B1, &T1);
         MULC_Karatsuba(A0, B0, &T0);
-        printf("T1 : "); show_bigint_hex(T1);
-        printf("T0 : "); show_bigint_hex(T0);
-        printf("\n");
+        // printf("T1 : (%d)", T1->sign); show_bigint_hex(T1);
+        // printf("T0 : (%d)", T0->sign); show_bigint_hex(T0);
+        // printf("\n");
         
         LeftShift(T1, 2 * l * WordBitLen);
         ADD(T1, T0, &R);
         RightShift(T1, 2 * l * WordBitLen);
-        printf("T1 + T0 : "); show_bigint_hex(R);
-        printf("T1 : "); show_bigint_hex(T1);
+        // printf("T1 + T0 : (%d)", R->sign); show_bigint_hex(R);
+        // printf("T1 : (%d)", T1->sign); show_bigint_hex(T1);
 
         SUB(A0, A1, &S1);
         SUB(B1, B0, &S0);
-        printf("S1 : (%d) ", S1->sign); show_bigint_hex(S1);
-        printf("S0 : (%d) ", S0->sign); show_bigint_hex(S0);
+        // printf("S1 : (%d) ", S1->sign); show_bigint_hex(S1);
+        // printf("S0 : (%d) ", S0->sign); show_bigint_hex(S0);
 
         int S_sign = S1->sign ^ S0->sign;
         S1->sign = NON_NEGATVE; S0->sign = NON_NEGATVE;
         MULC_Karatsuba(S1, S0, &S);
         if (S_sign == 0) S->sign = NON_NEGATVE;
         if (S_sign == 1) S->sign = NEGATIVE;
-        printf("S : (%d) ", S->sign); show_bigint_hex(S);
+        // printf("S : (%d) ", S->sign); show_bigint_hex(S);
 
-        ADD(S, T1, &S);
-        printf("S + T1 : (%d) ", S->sign); show_bigint_hex(S);
+        ADD(S, T1, &S);  
+        // printf("S + T1 : (%d) ", S->sign); show_bigint_hex(S);
         ADD(S, T0, &S);
-        printf("S + T1 + T0: (%d) ", S->sign); show_bigint_hex(S);
+        // printf("S + T1 + T0: (%d) ", S->sign); show_bigint_hex(S);
 
-        // Error tlqkf 
+        // Error...;; 
         LeftShift(S, l * WordBitLen);
-        printf("S : (%d) ", S->sign); show_bigint_hex(S);
+        // printf("S : (%d) ", S->sign); show_bigint_hex(S);
 
         ADD(R, S, &R);
-        printf("R : (%d) ", R->sign); show_bigint_hex(R);
+        // printf("R : (%d) ", R->sign); show_bigint_hex(R);
         bigint_refine(R);
         bigint_assign(z, R);
         
