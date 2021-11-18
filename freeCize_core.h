@@ -20,7 +20,7 @@ typedef unsigned long long word;
 // typedef unsigned int word;
 // typedef unsigned char word;
 // typedef unsigned long long word;
-
+ 
 // BigInt struct
 typedef struct{
     int sign;           // Negative or Positive
@@ -77,3 +77,6 @@ int Compare(bigint* x, bigint* y);              // Compare two integer
 // Left/Right shift Bigint 
 void LeftShift(bigint* A, int r);
 void RightShift(bigint* A, int r); 
+
+// Reduction : A mod 2 ^ r
+void Reduction(bigint* A, int r);
