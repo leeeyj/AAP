@@ -30,7 +30,7 @@ int main()
     
     printf("B : ");
     show_bigint_hex(B);
-    printf("\n");
+    printf("\n"); 
 
     // Multiplication Testing 
     bigint* mul = NULL;
