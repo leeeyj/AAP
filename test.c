@@ -31,7 +31,7 @@ int main()
     if (Py_IsInitialized()) {                                               // Python 인터프리터 초기화 확인 
         pName = PyUnicode_FromString("test1");                              // Python File name -> test1.py, 초기화 필요! 
         pModule = PyImport_Import(pName);                                   // Import Python File            초기화 필요!
-        pFunc = PyObject_GetAttrString(pModule, "mul_k");                     // test1.py에 있는 add 함수 (= 함수 이름)  초기화 필요!
+        pFunc = PyObject_GetAttrString(pModule, "add");                     // test1.py에 있는 add 함수 (= 함수 이름)  초기화 필요!
         if (PyCallable_Check(pFunc)) {                                      // 함수가 잘 불러져 왔는지 확인
             int count = 0;
             printf("Testing : ");
@@ -43,14 +43,14 @@ int main()
                 bigint* B = NULL;
                 bigint_gen_rand1(&B, NON_NEGATVE, 3);
                 
-                // bigint* sum = NULL;
-                // MULC_Naive(A, B, &sum);
+                bigint* sum = NULL;
+                MULC_Naive(A, B, &sum);
 
                 // bigint* sub = NULL;
                 // SUBC(A, B, &sub);
                 
-                bigint* mul = NULL;
-                MULC_Karatsuba(A, B, &mul);
+                // bigint* mul = NULL;
+                // MULC_Karatsuba(A, B, &mul);
                 
                 // bigint* mul = NULL;
                 // MUL_AB(A, B, &mul);
@@ -61,7 +61,7 @@ int main()
                 unsigned char* string_B = array2string(B);
                 pArg2 = PyUnicode_FromString(string_B);
 
-                unsigned char* string_mul = array2string(mul);
+                unsigned char* string_mul = array2string(sum);
                 pArg3 = PyUnicode_FromString(string_mul);
 
                 // Py_DECREF -> 메모리 누수 방지 
@@ -77,7 +77,7 @@ int main()
                     printf("\n");
                     printf("A : ");  show_bigint_hex(A);
                     printf("B : ");  show_bigint_hex(B);
-                    printf("MUL : ");  show_bigint_hex(mul);
+                    printf("MUL : ");  show_bigint_hex(sum);
 
                     Py_DECREF(string_A);
                     Py_DECREF(string_B);
@@ -90,7 +90,7 @@ int main()
 
                     bigint_delete(&A);
                     bigint_delete(&B);
-                    bigint_delete(&mul);
+                    bigint_delete(&sum);
 
                     free(string_A);
                     free(string_B);
@@ -110,7 +110,7 @@ int main()
 
                 bigint_delete(&A);
                 bigint_delete(&B);
-                bigint_delete(&mul);
+                bigint_delete(&sum);
 
                 free(string_A);
                 free(string_B);
