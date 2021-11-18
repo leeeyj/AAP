@@ -54,7 +54,7 @@ int main()
                 
                 // bigint* mul = NULL;
                 // MUL_AB(A, B, &mul);
-
+ 
                 unsigned char* string_A = array2string(A);
                 pArg1 = PyUnicode_FromString(string_A);                     // 매개 변수 생성, c언어 문자열을 파이썬 문자열로 변환 
 
