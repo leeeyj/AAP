@@ -401,7 +401,7 @@ void Reduction(bigint* A, int r)
     if ((k < len) && (0 < r0) && (r0 < WordBitLen)){
         for (int i = k+1; i < len; i++) {
             A->a[i] = 0;
-        }
+        } 
         q = (1 << r0) - 1;
         printf("%x", q);
         A->a[k] = A->a[k] & q;
