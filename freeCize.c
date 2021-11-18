@@ -64,7 +64,7 @@ void ADD(bigint* x, bigint* y, bigint** z)
         bigint_delete(&y_);
         return;
     }
-
+ 
     if ((!IsZero(y) && y->sign == NON_NEGATVE) && (!IsZero(x) && x->sign == NEGATIVE)){
         bigint* x_ = NULL;
         bigint_assign(&x_, x);
