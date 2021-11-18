@@ -31,7 +31,7 @@ typedef struct{
 // generate bigint
 void bigint_create(bigint** x, int wordlen);        // bigint dynamic memory allocation
 void bigint_delete(bigint** x);                     // bigint free memory 
-
+ 
 // bigint setting 
 void array_copy(word* A, word* T, int wordlen);                             // Copy word array
 void bigint_set_by_array(bigint** x, int sign, word* t, int wordlen);       // bigint setting by word array
