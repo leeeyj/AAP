@@ -136,7 +136,8 @@ void bigint_refine(bigint* x)
         return;
 
     // new_wordlen에 x의 word 길이를 대입
-    // new_wordlen이 1보다 클 경우, a 배열의 크기
+    // new_wordlen이 1보다 클 경우, a[new_wordlen - 1] 의 값이 0이 아닐 경우, break
+    // 0일 경우, x의 word 길이를 1씩 감소
     int new_wordlen = x->wordlen;
     while(new_wordlen > 1){
         if (x->a[new_wordlen - 1] != 0)
@@ -144,13 +145,16 @@ void bigint_refine(bigint* x)
         new_wordlen--;
     }
 
-    //x의 word 길이와 new_wordlen 값이 다를경우, 이미 할당한 공간의 크기를 (2*new_wordlen)byte로 바꿈
+    // x의 word 길이와 new_wordlen 값이 다를경우
+    // x의 word 길이에 new_wordlen 의 값 대입
+    // 이미 할당해 놓은 a의 크기를 (2*new_wordlen)byte로 바꿈
     if (x->wordlen != new_wordlen){
         x->wordlen = new_wordlen;
         x->a = (word*)realloc(x->a, sizeof(word)*new_wordlen);  
     }
 
-    //x의 word 길이의 값이 1이고 a[0]의 값이 NULL일 경우, sign은 음이 아닌 정수로 설정
+    // x의 word 길이의 값이 1이고 a[0]의 값이 NULL일 경우
+    // sign을 음이 아닌 정수로 설정
     if((x->wordlen == 1) && (x->a[0] == 0x0))
         x->sign = NON_NEGATVE;
 }
@@ -173,27 +177,34 @@ void bigint_assign(bigint** y, bigint* x)
 // bigint의 랜덤값 생성
 void bigint_gen_rand(bigint** x, int sign, int wordlen)
 {
-    //bigint 계산 함수를 실행한 후
-    //x에 부호 할당
-    //x에 a값을 대입하여 array_rand 함수 실행
+    // bigint 계산 함수를 실행한 후
+    // x의 주소에서 sign에 해당하는 변수에 sign 값 할당(대입)
+    // a 값을 x의 주소로 할당하여 array_rand 함수 실행
     bigint_create(x, wordlen);
     (*x)->sign = sign;
     array_rand((*x)->a, wordlen);
 
+    // x의 주소를 가지고 bigint_refine 함수 실행
     bigint_refine(*x);
 }
 
 void array_rand(word* dst, int wordlen)
 {
+    
     byte* p = (byte*)dst;
     int cnt = wordlen * sizeof(word);
+
+    // srand : rand 함수에서 사용될 수를 초기화 하는 함수
+    // 초기화시 seed에 대한 rand 값이 정해져 있기 때문에
+    // 런타임동안 항상 변하는 seed 값을 이용해서 srand를 해줘야함
+    // 따라서 시간을 seed 값으로 넣는 것
     srand(time(NULL));                      // Seed = Current time
     // srand(0);
 
     //cnt가 0보다 클 경우
     //난수와 0xff와 AND 연산한 값인 p의 주소를
     //1씩 늘려서 저장하고
-    //cnt의 값은 1씩 줄여서 저장
+    //wordlen과 word의 크기를 곱한 값인 cnt는 1씩 줄여서 저장
     while(cnt > 0)
     {
         *p = rand() & 0xff;                 // rand() is not safe, use "srand(time(NULL))",  
@@ -316,4 +327,85 @@ int Compare(bigint* x, bigint* y)
     
     return ret * (-1);
     
+}
+
+void LeftShift(bigint* A, int r)
+{   
+    // Case1 (r = WordBitLen * k)
+    if (r % WordBitLen == 0){
+        A->a = (word*)realloc(A->a, sizeof(word) * (r / WordBitLen + A->wordlen));
+
+        memmove(&(A->a[r / WordBitLen]), &(A->a[0]), sizeof(word) * A->wordlen);
+        A->wordlen += r / WordBitLen;
+        for (int i = 0; i < r / WordBitLen; i++){
+            A->a[i] = 0;
+        }
+        bigint_refine(A);
+    } 
+
+    // Case 2 (r = WordBitLen * k + r')
+    if (r % WordBitLen != 0){
+        A->a = (word*)realloc(A->a, sizeof(word) * (r / WordBitLen + A->wordlen + 1));
+
+        word t1 = A->a[0] >> (WordBitLen - (r % WordBitLen)); 
+        A->a[0] = A->a[0] << (r % WordBitLen);
+
+        for (int i = 1; i < A->wordlen; i++){
+            word t2 = A->a[i] >> (WordBitLen - (r % WordBitLen)); 
+            A->a[i] = (A->a[i] << (r % WordBitLen)) | t1;
+            t1 = t2;
+            t2 = 0;
+        }
+        A->a[A->wordlen] = t1;
+        t1 = 0; 
+        
+        memmove(&(A->a[r / WordBitLen]), &(A->a[0]), sizeof(word) * (A->wordlen + 1));
+
+        A->wordlen += (r / WordBitLen + 1);
+        for (int i = 0; i < (r / WordBitLen); i++){
+            A->a[i] = 0;
+        }
+        bigint_refine(A);
+    }
+    
+}
+
+void RightShift(bigint* A, int r)
+{   
+    // Case1 (r >= WordBitLen * A->wordlen)
+    if (r >= (WordBitLen * A->wordlen)){
+            (word*)realloc(A->a, sizeof(word));
+            A->a[0] = 0;
+            // Bigint Refine X
+    }
+
+    // Case2 (r = WordBitLen * k)
+    if (r % WordBitLen == 0){
+        memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * (A->wordlen - r / WordBitLen));
+        for (int i = A->wordlen - r / WordBitLen; i < A->wordlen; i++){
+            A->a[i] = 0;
+        }
+        bigint_refine(A);
+    }
+
+    // Case3 (r = WordBitLen * k + r')
+    if (r % WordBitLen != 0){
+        word t1 = A->a[A->wordlen - 1] << (WordBitLen - (r % WordBitLen));
+        A->a[A->wordlen - 1] = A->a[A->wordlen - 1] >> (r % WordBitLen);
+        
+        for (int i = A->wordlen - 2; i >= r / WordBitLen; i--){
+            word t2 = A->a[i] << (WordBitLen - (r % WordBitLen));
+            A->a[i] = t1 | (A->a[i] >> (r % WordBitLen));
+            t1 = t2;
+            t2 = 0;
+        }
+        t1 = 0;
+
+        memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * (A->wordlen - r / WordBitLen));
+        for (int i = A->wordlen - r / WordBitLen; i < A->wordlen; i++){
+            A->a[i] = 0;
+        }
+        bigint_refine(A);
+
+    }
 }
