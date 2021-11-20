@@ -29,7 +29,9 @@ void bigint_delete(bigint** x)
     if (*x == NULL)
         return;
     
-    //a의 첫 번째 배열에 대한 메모리 해제
+    //bigint_create 함수에서 a에게 필요한 크기를 동적으로 할당하였기 때문에
+    //free 함수를 통해 메모리 해제(삭제하는 역할)
+    //x의 주소에 NULL 값 대입
     free((*x)->a);
     free(*x);
     *x = NULL;
@@ -46,16 +48,31 @@ void array_copy(word* dest, word* src, int wordlen)
 // bigint를 배열로 세팅
 void bigint_set_by_array(bigint** x, int sign, word* t, int wordlen) 
 {
-    
     bigint_create(x, wordlen);
-    (*x)->sign = sign;
-    array_copy((*x)->a, t, wordlen);
+    (*x)->sign = sign;  // sign 메모리에 sign 값 저장
+    array_copy((*x)->a, t, wordlen);    // array_copy 함수 실행
 }
 
-// bigint를 string으로 세팅
+// bigint를 string으로 세팅 -> 파이썬에서 사용하기 위해서 string으로 세팅하는건가?
 void bigint_set_by_string(bigint** x, int sign, char* str, int base) 
 {
-    // string how...?
+    int size = strlen(str); // size = str의 문자열 길이
+    int byte_size = WordBitLen>>3; //WordBitLen을 오른쪽으로 3만큼 shift
+    size = size/byte_size;
+    
+    // size를 byte_size로 나눴을 때 나머지가 0이 아니라면
+    // size의 값을 1만큼 증가
+    if(size%byte_size != 0 )
+    {
+        size++;
+    }
+    bigint_create(x, size);
+    (*x)->sign = sign;
+    for(int i=0;i<size*byte_size;i+=byte_size)
+    {
+        // memset((*x)->a,strtoul(str, NULL, base),strlen(str)*sizeof(word));
+        //please your opinion. -keonhee
+    }
 }
 
 // Show(print) Bigint //
@@ -87,12 +104,28 @@ void show_bigint_hex(bigint *x)
 
 void show_bigint_dec(bigint* x)
 {
-    // How...?
+    // we need to make bigint to decimal func
+    // idk.... sorry
 }
 
 void show_bigint_bin(bigint* x)
 {
-    // How...?
+    int len = x->wordlen;   //len에 wordlen 값 대입
+    printf("0b");
+    for(int i=(len-1);i>0;i--)
+    {
+        word t = x->a[i];
+        for(int j=0;j<WordBitLen;j++)
+        {
+            // t를 j만큼 shift 했을 때의 비트 값이 1일 때는 1
+            // 값이 0일 때는 0 출력
+            if((t>>j)&(0x1) ==1)
+                printf("1");
+            else
+                printf("0"); 
+        }
+    }
+    printf("\n");
 }
 
 // bigint 정의
@@ -101,7 +134,7 @@ void bigint_refine(bigint* x)
     //에러 방지
     if (x == NULL)
         return;
-    
+
     // new_wordlen에 x의 word 길이를 대입
     // new_wordlen이 1보다 클 경우, a 배열의 크기
     int new_wordlen = x->wordlen;
