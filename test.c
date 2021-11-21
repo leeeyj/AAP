@@ -31,26 +31,25 @@ int main()
     if (Py_IsInitialized()) {                                               // Python 인터프리터 초기화 확인 
         pName = PyUnicode_FromString("test1");                              // Python File name -> test1.py, 초기화 필요! 
         pModule = PyImport_Import(pName);                                   // Import Python File            초기화 필요!
-        pFunc = PyObject_GetAttrString(pModule, "add");                     // test1.py에 있는 add 함수 (= 함수 이름)  초기화 필요!
+        pFunc = PyObject_GetAttrString(pModule, "mul_k");                   // test1.py에 있는 add 함수 (= 함수 이름)  초기화 필요!
         if (PyCallable_Check(pFunc)) {                                      // 함수가 잘 불러져 왔는지 확인
             int count = 0;
             printf("Testing : ");
-            for (int i = 1; i < 100001; i++) {                               // 10000번 테스트
-                
+            for (int i = 1; i < 100001; i++) {                               // 100000번 테스트
                 bigint* A = NULL;
                 bigint_gen_rand(&A, NON_NEGATVE, 17);
                 
                 bigint* B = NULL;
-                bigint_gen_rand1(&B, NON_NEGATVE, 3);
+                bigint_gen_rand1(&B, NON_NEGATVE, 12);
                 
-                bigint* sum = NULL;
-                MULC_Naive(A, B, &sum);
+                // bigint* sum = NULL;
+                // MULC_Naive(A, B, &sum);
 
                 // bigint* sub = NULL;
                 // SUBC(A, B, &sub);
                 
-                // bigint* mul = NULL;
-                // MULC_Karatsuba(A, B, &mul);
+                bigint* mul = NULL;
+                MUL(A, B, &mul);
                 
                 // bigint* mul = NULL;
                 // MUL_AB(A, B, &mul);
@@ -61,7 +60,7 @@ int main()
                 unsigned char* string_B = array2string(B);
                 pArg2 = PyUnicode_FromString(string_B);
 
-                unsigned char* string_mul = array2string(sum);
+                unsigned char* string_mul = array2string(mul);
                 pArg3 = PyUnicode_FromString(string_mul);
 
                 // Py_DECREF -> 메모리 누수 방지 
@@ -69,15 +68,15 @@ int main()
                 // printf("\nB : %s", string_B);
                 // printf("\nmul : %s", string_mul);
 
-                pValue = PyObject_CallFunctionObjArgs(pFunc, pArg1, pArg2, pArg3, NULL);     // 파이썬 test_func 함수 실행 ( 매개 변수 여러 개 전달 ) 초기화 필요!
-                // printf("%d", PyLong_AsLong(pValue));
+                pValue = PyObject_CallFunctionObjArgs(pFunc, pArg1, pArg2, pArg3, NULL);     // 파이썬 mul_k 함수 실행 ( 매개 변수 여러 개 전달 ) 초기화 필요!
+                // printf("%d", PyLong_AsLong(pValue));                                      // 인자가 더 이상 없다면 마지막에 NULL 
                 // printf("%d", PyLong_AsLong(pValue));
                 if (!PyLong_AsLong(pValue)) {
                     printf("\nError");
                     printf("\n");
                     printf("A : ");  show_bigint_hex(A);
                     printf("B : ");  show_bigint_hex(B);
-                    printf("MUL : ");  show_bigint_hex(sum);
+                    printf("MUL : ");  show_bigint_hex(mul);
 
                     Py_DECREF(string_A);
                     Py_DECREF(string_B);
@@ -90,7 +89,7 @@ int main()
 
                     bigint_delete(&A);
                     bigint_delete(&B);
-                    bigint_delete(&sum);
+                    bigint_delete(&mul);
 
                     free(string_A);
                     free(string_B);
@@ -103,14 +102,14 @@ int main()
                     printf("=");
                 }
 
-                Py_XDECREF(pArg1);
-                Py_XDECREF(pArg2);
-                Py_XDECREF(pArg3);
-                Py_XDECREF(pValue);
+                Py_DECREF(pArg1);
+                Py_DECREF(pArg2);
+                Py_DECREF(pArg3);
+                Py_DECREF(pValue);
 
                 bigint_delete(&A);
                 bigint_delete(&B);
-                bigint_delete(&sum);
+                bigint_delete(&mul);
 
                 free(string_A);
                 free(string_B);
