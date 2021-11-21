@@ -237,9 +237,13 @@ bool IsZero(bigint* x)
 
 bool IsOne(bigint* x)
 {
+    /*
     if (x->sign == 1 || x->a[0] != 1)
         return false;
-    
+    */
+    if (x->a[0] != 1)
+        return false;
+        
     for (int i = (x->wordlen) - 1; i >= 1; i--){
         if (x->a[i] != 0)
             return false;
