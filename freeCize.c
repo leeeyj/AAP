@@ -338,3 +338,214 @@ void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
         bigint_delete(&S); bigint_delete(&R);
     }
 }
+
+void MUL(bigint* x, bigint* y, bigint** z)
+{
+    if (IsZero(x) | IsZero(y))
+    {
+        bigint* mul = NULL;
+        bigint_create(&mul, 1);
+        mul->a[0] = 0;
+        bigint_assign(z, mul);
+        bigint_delete(&mul);
+        return;
+    }
+    if (IsOne(x)){
+        bigint_assign(z, y);
+        (*z)->sign = (x->sign + y->sign) % 2;
+        return;
+    }
+    if (IsOne(y)){
+        bigint_assign(z, x);
+        (*z)->sign = (x->sign + y->sign) % 2;
+        return;
+    }
+    int x_sign = x->sign;
+    int y_sign = y->sign;
+    x->sign = NON_NEGATVE;
+    y->sign = NON_NEGATVE;
+    MULC_Karatsuba(x, y, z);
+    x->sign = x_sign;
+    y->sign = y_sign;
+    (*z)->sign = (x->sign + y->sign) % 2;
+    return;
+}
+
+// DIVISION //
+void Long_Division(bigint* A, bigint* B, bigint** Q)
+{
+    bigint* q = NULL;
+    bigint* r = NULL;
+    
+    // Q Initial Setting 
+    bigint_create(&q, 1);
+    q->a[0] = 0;
+
+    // R Initial Setting
+    bigint_assign(&r, A);
+    RightShift(r, WordBitLen);
+    word A0 = A->a[0];
+
+    for (int i = WordBitLen - 1; i >= 0; i--){
+        if (r->a[0] >= (word)(1<<(WordBitLen-1))){
+            q->a[0] += (word)(1<<i);
+            LeftShift(r, 1);
+            r->a[0] += (A0 >> i) & 0x01;
+            SUB(r, B, &r);
+        }    
+        else{
+            LeftShift(r, 1);
+            r->a[0] += (A0 >> i) & 0x01;
+            if (Compare(r, B) == 1 | Compare(r, B) == 0){
+                q->a[0] += (word)(1<<i);
+                SUB(r, B, &r);
+            }
+        }
+    }
+
+    // show_bigint_hex(Q);
+    // show_bigint_hex(R);
+
+    bigint_assign(Q, q);
+    bigint_delete(&q);
+    bigint_delete(&r);
+    A0 = 0;
+}
+
+void DIVCC(bigint* A, bigint* B, bigint** Q, bigint** R)
+{
+    bigint* q = NULL;
+    bigint* r = NULL;
+    bigint* Bq = NULL;
+
+    if (A->wordlen == B->wordlen){
+        bigint_create(&q, 1);
+        q->a[0] = (word)(A->a[B->wordlen - 1] / B->a[B->wordlen - 1]);
+    }
+
+    if (A->wordlen == B->wordlen + 1){
+        if (A->a[B->wordlen] == B->a[B->wordlen - 1]){
+            bigint_create(&q, 1);
+            #if WordBitLen == 32
+            q->a[0] = 0xffffffff;
+            #elif WordBitLen == 8
+            q->a[0] = 0xff;
+            #elif WordBitLen == 64
+            q->a[0] = 0xffffffffffffffff;
+            #endif
+        } else {
+            bigint* new_A = NULL;
+            bigint* new_B = NULL;
+
+            bigint_create(&new_A, 2);
+            bigint_create(&new_B, 1);
+            new_A->a[0] = A->a[B->wordlen - 1];
+            new_A->a[1] = A->a[B->wordlen];
+            new_B->a[0] = B->a[B->wordlen - 1];
+
+            Long_Division(new_A, new_B, &q);
+            
+            bigint_delete(&new_A);
+            bigint_delete(&new_B);
+        }
+    }
+
+    MUL(B, q, &Bq);
+    SUB(A, Bq, &r);
+
+    bigint* t = NULL;
+    bigint_create(&t, 1);
+    t->a[0] = 1;
+
+    while (r->sign == NEGATIVE){
+        SUB(q, t, &q);
+        ADD(r, B, &r);
+    }
+
+    bigint_assign(Q, q);
+    bigint_assign(R, r);
+
+    bigint_delete(&t);
+    bigint_delete(&q);
+    bigint_delete(&r);
+    bigint_delete(&Bq);
+}
+
+void DIVC(bigint* A, bigint* B, bigint** Q, bigint** R)
+{   
+    bigint* q = NULL;
+    bigint* r = NULL;
+    bigint* A_ = NULL;
+    bigint* B_ = NULL;
+
+    bigint_assign(&A_, A);
+    bigint_assign(&B_, B);
+
+    if (Compare(A_, B_) == -1){
+        bigint_create(&q, 1);
+        q->a[0] = 0;
+
+        bigint_assign(Q, q);
+        bigint_assign(R, A_);
+
+        bigint_delete(&q);
+        return;
+    }
+
+    int k = 0;
+    while(B_->a[B_->wordlen - 1] <= (1 << (WordBitLen - 1))){
+        LeftShift(A_, 1);
+        LeftShift(B_, 1);
+        k += 1;
+    }
+
+    DIVCC(A_, B_, &q, &r);
+
+    bigint_assign(Q, q);
+    RightShift(r, k);
+    bigint_assign(R, r);
+
+    bigint_delete(&q);
+    bigint_delete(&r);
+    bigint_delete(&A_);
+    bigint_delete(&B_);
+}
+
+void DIV(bigint* A, bigint* B, bigint** Q, bigint** R)
+{
+    bigint* qi = NULL;
+    bigint* r = NULL;
+    bigint* q = NULL;
+
+    if (Compare(A, B) == -1){
+        bigint_create(&qi, 1);
+        qi->a[0] = 0;
+
+        bigint_assign(Q, qi);
+        bigint_assign(R, A);
+
+        bigint_delete(&qi);
+        return;
+    }
+
+    bigint_create(&r, 1);
+    r->a[0] = 0;
+
+    bigint_create(&q, A->wordlen);
+
+    for (int i = A->wordlen - 1; i >= 0; i--){
+        LeftShift(r, WordBitLen);
+        r->a[0] += A->a[i];
+        DIVC(r, B, &qi, &r);
+        q->a[i] = qi->a[0];
+    }
+
+    bigint_refine(q);
+    bigint_refine(r);
+    bigint_assign(Q, q);
+    bigint_assign(R, r);
+
+    bigint_delete(&q);
+    bigint_delete(&r);
+    bigint_delete(&qi);
+}
