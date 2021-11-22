@@ -474,7 +474,24 @@ void Exponentiation2(bigint* x, int N, bigint** z)
 
 }
 
-
+void Montgomery_reduction(bigint* x, bigint* N,bigint**z)
+{
+    bigint**R = NULL;
+    while(1)
+    {
+        bigint_gen_rand(R,NON_NEGATVE,N->wordlen);
+        if(gcd(R,N)==1)
+        {
+            if(Compare(N,R)==-1)
+            {
+                break;
+            }
+        }
+    }
+    //exgcd(R,N)  ==>>> N' 값 구하고 mod R===> 하위 R->wordlen
+    
+    
+}
 // DIVISION //
 void Long_Division(bigint* A, bigint* B, bigint** Q)
 {

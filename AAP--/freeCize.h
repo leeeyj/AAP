@@ -21,8 +21,9 @@ void Sqr_karatsba(bigint* x, bigint** y);
 void SQUC(bigint* x, bigint** y);
 
 void Exponentiation(bigint* x, int N, bigint** z);
+void Exponentiation2(bigint* x, int N, bigint** z);
 void Modular_Exponentiation(bigint* x, int N, bigint** z);
-
+void Montgomery_reduction(bigint* x, bigint* N,bigint**z);
 // Bigint Division
 void Long_Division(bigint* A, bigint* B, bigint** Q);
 void DIVCC(bigint* A, bigint* B, bigint** Q, bigint** R);
