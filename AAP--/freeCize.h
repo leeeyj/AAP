@@ -14,3 +14,16 @@ void SUB(bigint* x, bigint* y, bigint** z);
 void MUL_AB(word* x, word* y, bigint** z);                  // Single word Multiplication
 void MULC_Naive(bigint* x, bigint* y, bigint** z);          // Multiplication Naive Version 
 void MULC_Karatsuba(bigint* x, bigint* y, bigint** z);      // Fast Multiplication Algorithm
+
+void Single_percision_sqr(word A, word* C);
+void Sqr_karatsba(bigint* x, bigint** y);
+void SQUC(bigint* x, bigint** y);
+
+void Exponentiation(bigint* x, int N, bigint** z);
+void Modular_Exponentiation(bigint* x, int N, bigint** z);
+
+// Bigint Division
+void Long_Division(bigint* A, bigint* B, bigint** Q);
+void DIVCC(bigint* A, bigint* B, bigint** Q, bigint** R);
+void DIVC(bigint* A, bigint* B, bigint** Q, bigint** R);
+void DIV(bigint* A, bigint* B, bigint** Q, bigint** R);

@@ -144,7 +144,7 @@ void bigint_refine(bigint* x)
 // Assign Bigint //
 void bigint_assign(bigint** y, bigint* x)
 {
-    if(*y != NULL)              // bigint y가 비어있지 않다면..?
+    if((*y) != NULL)              // bigint y가 비어있지 않다면..?
         bigint_delete(y);       // bigint y를 비우고 
     
     bigint_create(y, x->wordlen);       // y를 x의 word길이 만큼 새로 만들기  
@@ -304,6 +304,7 @@ void LeftShift(bigint* A, int r)
             A->a[i] = 0;
         }
         bigint_refine(A);
+        return;
     } 
 
     // Case 2 (r = WordBitLen * k + r')
@@ -329,6 +330,7 @@ void LeftShift(bigint* A, int r)
             A->a[i] = 0;
         }
         bigint_refine(A);
+        return;
     }
     
 }
@@ -338,21 +340,20 @@ void RightShift(bigint* A, int r)
     int o = WordBitLen * A->wordlen; 
     // Case1 (r >= WordBitLen * A->wordlen)
     if (r >= o){
-            bigint* new = NULL;
-            bigint_create(&new, 1);
-            new->a[0] = 0;
-            bigint_assign(&A, new);
-            bigint_delete(&new);
-            // Bigint Refine X
+        memset(A->a, 0, sizeof(word) * A->wordlen);
+        bigint_refine(A);
+        // Bigint Refine X
+        return;
     }
 
     // Case2 (r = WordBitLen * k)
     if (r % WordBitLen == 0 && r < o){
         memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * (A->wordlen - r / WordBitLen));
-        for (int i = A->wordlen - r / WordBitLen; i < A->wordlen; i++){
+        for (int i = A->wordlen - (r / WordBitLen); i < A->wordlen; i++){
             A->a[i] = 0;
         }
         bigint_refine(A);
+        return;
     }
 
     // Case3 (r = WordBitLen * k + r')
@@ -373,7 +374,7 @@ void RightShift(bigint* A, int r)
             A->a[i] = 0;
         }
         bigint_refine(A);
-
+        return;
     }
 }
 
@@ -384,31 +385,29 @@ void Reduction(bigint* A, int r)
 
     int k = r / WordBitLen;
     int len = A->wordlen;
+    int r0 = r % WordBitLen;
+    word q = 0;
+
     // case 2: r = WordBitLen * k, k < wordlen
-    if (k < len && r % WordBitLen == 0){
-        bigint* new = NULL;
-        bigint_create(&new, k);
-        for(int i = 0; i < k; i++){
-            new->a[i] = A->a[i];
+    if ((k < len) && (r0 == 0)){
+        for (int i = k; i < len; i++) {
+            A->a[i] = 0;
         }
-        bigint_refine(new);
-        bigint_assign(&A, new);
-        bigint_delete(&new);
+        bigint_refine(A);
+        return;
     }
-
+    
     // case 3: r = WordBitLen * k + r, same
-    if (k < len && r % WordBitLen < WordBitLen){
-        bigint* new = NULL;
-        bigint_create(&new, k + 1);
-        for (int i = 0; i < k; i++){
-            new->a[i] = A->a[i];
+    if ((k < len) && (0 < r0) && (r0 < WordBitLen)){
+        for (int i = k+1; i < len; i++) {
+            A->a[i] = 0;
         }
-
-        word q = (1 << (r % WordBitLen)) - 1;
-        new->a[k] = A->a[k] & q;
-        bigint_refine(new);
-        bigint_assign(&A, new);
-        bigint_delete(&new);
+        q = (1 << r0) - 1;
+        printf("%x", q);
+        A->a[k] = A->a[k] & q;
+        bigint_refine(A);
+        return;
     }
-        
+    
+    return;
 }
