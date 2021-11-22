@@ -406,18 +406,18 @@ void Sqr_karatsba(bigint* x, bigint** y)
     
     bigint_assign(A0, x);
     bigint_assign(A1, x);
-    RightShift(A1, l * (x->wordlen));
-    Reduction(A0, l * (x->wordlen));
+    RightShift(A1, l * (WordBitLen));
+    Reduction(A0, l * (WordBitLen));
 
     bigint** T0=NULL; bigint** T1=NULL;
     Sqr_karatsba(A1, T1);
     Sqr_karatsba(A0, T0);
 
     bigint** R = NULL; bigint** S = NULL;
-    LeftShift(T1, 2 * l * (x->wordlen));
+    LeftShift(T1, 2 * l * (WordBitLen));
     ADD(T1, T0, R);
     MULC_Karatsuba(A0, A1, S);
-    LeftShift(S, l * (x->wordlen) + 1);
+    LeftShift(S, l * (WordBitLen) + 1);
     ADD(R, S, y);
 }
 void Exponentiation(bigint* x, int N, bigint** z)
