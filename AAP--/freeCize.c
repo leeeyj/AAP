@@ -353,6 +353,34 @@ void Single_percision_sqr(word A, word* C)
     C[1] = (((A1 * A1) << WordBitLen) + (A0 * A0) + ((A0 * A1) << (worddiv2 + 1))) && (1 << WordBitLen);
     C[0] = (((A1 * A1) << WordBitLen) + (A0 * A0) + ((A0 * A1) << (worddiv2 + 1)))>>WordBitLen;
 }
+
+#if 0 //구현이 너무 어려움 370번 라인 저렇게 하는거 아닌거 아는데,, 어케하는지,,,
+void Sqr_Textbook(bigint* x, bigint**y)
+{
+    bigint** C1 = NULL;bigint** C2 = NULL;
+    bigint** T2 = NULL;
+    word T1[2] = {0,0};
+    
+    bigint_create(T2,2*(sizeof(word)));
+    bigint_create(C1,2*(x->wordlen));bigint_create(C2,2*(x->wordlen));
+    int t = x->wordlen;
+    for (int i = 0;i<t;i++)
+    {
+        Single_percision_sqr(x->a[i],&T1);
+        (*C1)->a[2*i] = T1[0];
+        (*C1)->a[2*i+1] = T1[1];
+        for(int j=i+1;j<(t-1);j++)
+        {
+            MUL_AB(x->a[i],x->a[j],T2);
+            LeftShift(T2,(i+j)*sizeof(word));
+            ADD(C1,T2,C2);
+        }
+    }
+    LeftShift(C2,1);
+    ADD(C1,C2,y);
+
+}
+#endif
 void SQUC(bigint* x, bigint** y)
 {
     if (x->wordlen == 0)

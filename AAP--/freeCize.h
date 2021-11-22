@@ -16,6 +16,7 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z);          // Multiplication Na
 void MULC_Karatsuba(bigint* x, bigint* y, bigint** z);      // Fast Multiplication Algorithm
 
 void Single_percision_sqr(word A, word* C);
+void Sqr_Textbook(bigint* x, bigint**y);
 void Sqr_karatsba(bigint* x, bigint** y);
 void SQUC(bigint* x, bigint** y);
 
