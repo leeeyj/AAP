@@ -20,27 +20,27 @@ int main()
     printf("\n"); 
 
     // Division Testing
-    bigint* q = NULL;
-    bigint* r = NULL;
-    DIV(A, B, &q, &r);
-    show_bigint_hex(q);
-    show_bigint_hex(r);
-            
+    // bigint* q = NULL;
+    // bigint* r = NULL;
+    // DIV(A, B, &q, &r);
+    // show_bigint_hex(q);
+    // show_bigint_hex(r);
+             
     // Multiplication Testing 
-    // bigint* mul = NULL;
-    // MULC_Karatsuba(A, B, &mul);
-    // printf("Mul : ");
-    // show_bigint_hex(mul);
+    bigint* mul = NULL;
+    MUL(A, B, &mul);
+    printf("Mul : ");
+    show_bigint_hex(mul);
 
     // Test deleting bigint
     bigint_delete(&A);
     bigint_delete(&B);
-    bigint_delete(&q);
-    bigint_delete(&r);
+    // bigint_delete(&q);
+    // bigint_delete(&r);
 
     // bigint_delete(&sum);
     // bigint_delete(&sub);
-    // bigint_delete(&mul);
+    bigint_delete(&mul);
     // printf("%p", mul);
     
 
