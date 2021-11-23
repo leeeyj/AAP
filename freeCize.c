@@ -396,7 +396,7 @@ void Long_Division(bigint* A, bigint* B, bigint** Q)
         else{
             LeftShift(r, 1);
             r->a[0] += (A0 >> i) & 0x01;
-            if (Compare(r, B) == 1 | Compare(r, B) == 0){
+            if (Compare(r, B) == 1 || Compare(r, B) == 0){
                 q->a[0] += (word)(1<<i);
                 SUB(r, B, &r);
             }
