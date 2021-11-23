@@ -16,6 +16,18 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z);          // Multiplication Na
 void MULC_Karatsuba(bigint* x, bigint* y, bigint** z);      // Fast Multiplication Algorithm
 void MUL(bigint* x, bigint* y, bigint** z);
 
+// Bigint Squaring 
+void Single_percision_sqr(word A, bigint** C);
+void Sqr_Textbook(bigint* x, bigint** y);
+void Sqr_karatsuba(bigint* x, bigint** y);
+void SQU(bigint* x, bigint** y);
+
+//bigint modulo exponential
+// void Exponentiation(bigint* x, int N, bigint** z);
+// void Exponentiation2(bigint* x, int N, bigint** z);
+//void Modular_Exponentiation(bigint* x, int N, bigint** z);
+//void Montgomery_reduction(bigint* x, bigint* N,bigint**z);
+
 // Bigint Division
 void Long_Division(bigint* A, bigint* B, bigint** Q);
 void DIVCC(bigint* A, bigint* B, bigint** Q, bigint** R);
