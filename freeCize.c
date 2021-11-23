@@ -18,7 +18,14 @@ void ADD_ABC(word* x, word* y, int* c, word* C)
 
 void ADDC(bigint* x, bigint* y, bigint** z)
 {   
+    word* tmp = NULL;
+    tmp = y->a;
     y->a = (word*)realloc(y->a, sizeof(word)*(x->wordlen));
+    if (y->a == NULL) {
+        printf("Memory Reallocation Fail\n");
+        y->a = tmp;
+        return;
+    }
     for (int j = y->wordlen; j < x->wordlen; j++){
         y->a[j] = 0;
     }
@@ -101,7 +108,14 @@ void SUB_AbB(word* A, word* B, int* b, word* C)
 
 void SUBC(bigint* A, bigint* B, bigint** z)
 {
+    word* tmp = NULL;
+    tmp = B->a;
     B->a = (word*)realloc(B->a, sizeof(word) * (A->wordlen));
+    if (B->a == NULL) {
+        printf("Memory Reallocation Fail");
+        B->a = tmp;
+        return;
+    }
     for (int j = B->wordlen; j < A->wordlen; j++) {
         B->a[j] = 0;
     }
@@ -568,9 +582,7 @@ void Single_percision_sqr(word A, bigint** C)
     bigint* T = NULL;
     bigint_create(&T, 1);
     T->a[0] = A0 * A1;
-    
     LeftShift(T, worddiv2 + 1);
-    
     ADD(c, T, &c);
 
     bigint_assign(C, c);
