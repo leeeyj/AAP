@@ -261,7 +261,7 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z)
 void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
 {   
     // wordlen이 충분히 길지 않으면 Naive Version으로 연산하는 것이 더 빠르다
-    if (x->wordlen <= 10 | y->wordlen <= 10){
+    if (x->wordlen <= 10 || y->wordlen <= 10){
         MULC_Naive(x, y, z);
         return;
     }
@@ -341,7 +341,7 @@ void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
 
 void MUL(bigint* x, bigint* y, bigint** z)
 {
-    if (IsZero(x) | IsZero(y))
+    if (IsZero(x) || IsZero(y))
     {
         bigint* mul = NULL;
         bigint_create(&mul, 1);
@@ -548,4 +548,157 @@ void DIV(bigint* A, bigint* B, bigint** Q, bigint** R)
     bigint_delete(&q);
     bigint_delete(&r);
     bigint_delete(&qi);
+}
+
+void Single_percision_sqr(word A, bigint** C)
+{
+    bigint* c = NULL;
+    bigint_create(&c, 2);
+
+    int worddiv2 = (WordBitLen >> 1);
+    word A1 = A >> worddiv2;
+    word A0 = A % (1 << worddiv2);
+    
+    word C0 = A0 * A0;
+    word C1 = A1 * A1;
+    
+    c->a[1] = C1;
+    c->a[0] = C0;
+
+    bigint* T = NULL;
+    bigint_create(&T, 1);
+    T->a[0] = A0 * A1;
+    
+    LeftShift(T, worddiv2 + 1);
+    
+    ADD(c, T, &c);
+
+    bigint_assign(C, c);
+
+    bigint_delete(&T);
+    bigint_delete(&c);
+}
+
+void Sqr_Textbook(bigint* x, bigint** y)
+{
+    bigint* C1 = NULL; 
+    bigint* C2 = NULL;
+    bigint* T1 = NULL; 
+    bigint* T2 = NULL;
+    
+    bigint_create(&C1, 1);
+    bigint_create(&C2, 1);
+    
+    int t = x->wordlen;
+    for (int i = 0; i < t; i++)
+    {
+        Single_percision_sqr(x->a[i], &T1);
+        LeftShift(T1, 2 * i * WordBitLen);
+        ADD(C1, T1, &C1);
+        for (int j = i + 1; j < t; j++)
+        {
+            MUL_AB(&(x->a[i]), &(x->a[j]), &T2);
+            LeftShift(T2, (i + j) * WordBitLen);
+            ADD(C2, T2, &C2);
+        }
+    }  
+    LeftShift(C2, 1);
+    ADD(C1, C2, y);
+
+    bigint_delete(&T2);
+    bigint_delete(&T1);
+    bigint_delete(&C2);
+    bigint_delete(&C1);
+}
+
+void SQU(bigint* x, bigint** y)
+{
+    if (IsZero(x) || IsOne(x)){
+        bigint_assign(y, x);
+        (*y)->sign = NON_NEGATVE;
+        return;
+    }
+    Sqr_Textbook(x, y);
+    return;
+}
+
+void Sqr_karatsuba(bigint* x, bigint** y)
+{
+    if (x->wordlen <= 10)
+    {
+        SQU(x, y);
+        return;
+    }
+    
+    int l = (x->wordlen + 1) >> 1;
+    bigint* A1 = NULL;
+    bigint* A0 = NULL;
+    bigint_assign(&A0, x);
+    bigint_assign(&A1, x);
+    A0->sign = NON_NEGATVE;
+    A1->sign = NON_NEGATVE;
+
+    RightShift(A1, l * WordBitLen);
+    Reduction(A0, l * WordBitLen);
+
+    // printf("A1 : "); show_bigint_hex(A1);
+    // printf("A0 : "); show_bigint_hex(A0);
+
+    bigint* T0 = NULL; 
+    bigint* T1 = NULL;
+    Sqr_karatsuba(A1, &T1);
+    Sqr_karatsuba(A0, &T0);
+
+    // printf("T1 : "); show_bigint_hex(T1);
+    // printf("T0 : "); show_bigint_hex(T0);
+
+    bigint* R = NULL; 
+    bigint* S = NULL;
+    LeftShift(T1, 2 * l * WordBitLen);
+    ADD(T1, T0, &R);
+    // printf("R : "); show_bigint_hex(R);
+
+    MULC_Karatsuba(A1, A0, &S);
+    // printf("S : "); show_bigint_hex(S);
+
+    LeftShift(S, l * WordBitLen +1);
+    // printf("S : "); show_bigint_hex(S);
+    
+    ADDC(R, S, y);
+    // printf("C : "); show_bigint_hex((*y));
+
+
+    bigint_delete(&A1);
+    bigint_delete(&A0);
+    bigint_delete(&T0);
+    bigint_delete(&T1);
+    bigint_delete(&R);
+    bigint_delete(&S);
+}
+
+void Exponentiation(bigint* x, int N, bigint** z)
+{
+    bigint* t0 = NULL;
+    bigint* t1 = NULL;
+    bigint_create(&t0, 1);
+    bigint_assign(&t1, x);
+    t0->a[0] = 1;
+
+    int l = x->wordlen;
+    for (int i = l - 1; i > 0; i--)
+    {
+        if (N & 0x1 == 1)
+        {
+            MUL(t0, t1, &t0);
+            Sqr_karatsuba(t1, &t1);
+        }
+        else
+        {
+            MUL(t0, t1, &t1);
+            Sqr_karatsuba(t0, &t0);
+        }
+        N >> 1;
+    }
+    bigint_assign(z, t0);
+
 }
