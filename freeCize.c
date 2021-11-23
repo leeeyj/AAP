@@ -549,3 +549,154 @@ void DIV(bigint* A, bigint* B, bigint** Q, bigint** R)
     bigint_delete(&r);
     bigint_delete(&qi);
 }
+
+
+void Single_percision_sqr(word A, word* C) 
+{
+    int worddiv2 = (WordBitLen >> 1);
+    word A1 = A >> worddiv2;
+    word A0 = A % (1 << worddiv2);
+    word C0 = A0*A0;
+    word C1 = A1 * A1;
+    C[1] = (((A1 * A1) << WordBitLen) + (A0 * A0) + ((A0 * A1) << (worddiv2 + 1))) && (1 << WordBitLen);
+    C[0] = (((A1 * A1) << WordBitLen) + (A0 * A0) + ((A0 * A1) << (worddiv2 + 1)))>>WordBitLen;
+}
+
+#if 0 //구현이 너무 어려움 370번 라인 저렇게 하는거 아닌거 아는데,, 어케하는지,,,
+void Sqr_Textbook(bigint* x, bigint**y)
+{
+    bigint** C1 = NULL;bigint** C2 = NULL;
+    bigint** T2 = NULL;
+    word T1[2] = {0,0};
+    
+    bigint_create(T2,2*(sizeof(word)));
+    bigint_create(C1,2*(x->wordlen));bigint_create(C2,2*(x->wordlen));
+    int t = x->wordlen;
+    for (int i = 0;i<t;i++)
+    {
+        Single_percision_sqr(x->a[i],&T1);
+        (*C1)->a[2*i] = T1[0];
+        (*C1)->a[2*i+1] = T1[1];
+        for(int j=i+1;j<(t-1);j++)
+        {
+            MUL_AB(x->a[i],x->a[j],T2);
+            LeftShift(T2,(i+j)*sizeof(word));
+            ADD(C1,T2,C2);
+        }
+    }
+    LeftShift(C2,1);
+    ADD(C1,C2,y);
+
+}
+#endif
+void SQUC(bigint* x, bigint** y)
+{
+    if (x->wordlen == 0)
+        bigint_assign(y, x);
+    if (x->wordlen == 1)
+    {
+        bigint_create(y, 1);
+        (*y)->a[0] = 1;
+    }
+}
+void Sqr_karatsba(bigint* x, bigint** y) 
+{
+    if (x->wordlen < 2)
+    {
+        SQUC(x, y);
+        return;
+    }
+    int xsign = x->sign;
+    x->sign = NON_NEGATVE;
+    int l = (x->wordlen + 1) >> 1;
+    bigint** A1 = NULL;
+    bigint** A0 = NULL;
+    
+    bigint_assign(A0, x);
+    bigint_assign(A1, x);
+    RightShift(A1, l * (WordBitLen));
+    Reduction(A0, l * (WordBitLen));
+
+    bigint** T0=NULL; bigint** T1=NULL;
+    Sqr_karatsba(A1, T1);
+    Sqr_karatsba(A0, T0);
+
+    bigint** R = NULL; bigint** S = NULL;
+    LeftShift(T1, 2 * l * (WordBitLen));
+    ADD(T1, T0, R);
+    MULC_Karatsuba(A0, A1, S);
+    LeftShift(S, l * (WordBitLen) + 1);
+    ADD(R, S, y);
+}
+void Exponentiation(bigint* x, int N, bigint** z)
+{
+    bigint* t0 = NULL;
+    bigint* t1 = NULL;
+    bigint_create(t0, 1);
+    bigint_assign(t1, x);
+    t0->a[0] = 1;
+    
+    int l = x->wordlen;
+    for (int i = l - 1; i > 0; i--)
+    {
+        if (N & 0x1 == 1)
+        {
+            MULC_Karatsuba(t0, t1, t0);
+            Sqr_karatsba(t1,t1);
+        }
+        else
+        {
+            MULC_Karatsuba(t0, t1, t1);
+            Sqr_karatsba(t0, t0);
+        }
+        N >> 1;
+    }
+    bigint_assign(z, t0);
+
+}
+
+void Exponentiation2(bigint* x, int N, bigint** z)
+{
+    bigint* t0 = NULL;
+    bigint* t1 = NULL;
+    bigint_create(t0, 1);
+    bigint_assign(t1, x);
+    t0->a[0] = 0;
+
+    int l = x->wordlen;
+    for (int i = l - 1; i < 0; i--)
+    {
+        if (N & 0x1 == 1)
+        {
+            ADD(t0, t1, t0);
+            LeftShift(t1, 1);
+        }
+        else
+        {
+            ADD(t0, t1, t1);
+            LeftShift(t0, t0);
+        }
+        N >> 1;
+    }
+    bigint_assign(z, t0);
+
+}
+
+void Montgomery_reduction(bigint* x, bigint* N,bigint**z)
+{
+    bigint**R = NULL;
+    while(1)
+    {
+        bigint_gen_rand(R,NON_NEGATVE,N->wordlen);
+        if(gcd(R,N)==1)
+        {
+            if(Compare(N,R)==-1)
+            {
+                break;
+            }
+        }
+    }
+    //exgcd(R,N)  ==>>> N' 값 구하고 mod R===> 하위 R->wordlen
+    
+    
+}
