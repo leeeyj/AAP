@@ -618,6 +618,7 @@ void SQU(bigint* x, bigint** y)
         (*y)->sign = NON_NEGATVE;
         return;
     }
+
     Sqr_Textbook(x, y);
     return;
 }
@@ -676,7 +677,7 @@ void Sqr_karatsuba(bigint* x, bigint** y)
     bigint_delete(&S);
 }
 
-void Exponentiation(bigint* x, int N, bigint** z)
+void Exponentiation(bigint* x, bigint* N, bigint** z, bigint* M)
 {
     bigint* t0 = NULL;
     bigint* t1 = NULL;
@@ -684,21 +685,47 @@ void Exponentiation(bigint* x, int N, bigint** z)
     bigint_assign(&t1, x);
     t0->a[0] = 1;
 
-    int l = x->wordlen;
-    for (int i = l - 1; i > 0; i--)
-    {
-        if (N & 0x1 == 1)
-        {
+    bigint* N_ = NULL;
+    bigint_assign(&N_, N);
+    int l = 0;
+    while(!IsZero(N_)){
+        l += 1;
+        RightShift(N_, 1);
+    }
+    bigint_delete(&N_);
+
+    bigint* Q = NULL;
+    bigint* R = NULL;
+
+    for (int i = l-1; i >= 0; i--){
+        if (((N->a[i/N->wordlen]) >> (i % WordBitLen)) & 0x1)
+        {   
             MUL(t0, t1, &t0);
-            Sqr_karatsuba(t1, &t1);
+            DIV(t0, M, &Q, &R);
+            bigint_assign(&t0, R);
+            MUL(t1, t1, &t1);
+            DIV(t1, M, &Q, &R);
+            bigint_assign(&t1, R);
         }
         else
         {
             MUL(t0, t1, &t1);
-            Sqr_karatsuba(t0, &t0);
+            DIV(t1, M, &Q, &R);
+            bigint_assign(&t1, R);
+            MUL(t0, t0, &t0);
+            DIV(t0, M, &Q, &R);
+            bigint_assign(&t0, R);
         }
-        N >> 1;
     }
+
+
+
+
+
     bigint_assign(z, t0);
 
+    bigint_delete(&t0);
+    bigint_delete(&t1);
+    bigint_delete(&Q);
+    bigint_delete(&R);
 }
