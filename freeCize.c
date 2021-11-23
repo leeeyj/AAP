@@ -341,7 +341,7 @@ void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
 
 void MUL(bigint* x, bigint* y, bigint** z)
 {
-    if (IsZero(x) | IsZero(y))
+    if (IsZero(x) || IsZero(y))
     {
         bigint* mul = NULL;
         bigint_create(&mul, 1);
@@ -360,14 +360,23 @@ void MUL(bigint* x, bigint* y, bigint** z)
         (*z)->sign = (x->sign + y->sign) % 2;
         return;
     }
-    int x_sign = x->sign;
-    int y_sign = y->sign;
-    x->sign = NON_NEGATVE;
-    y->sign = NON_NEGATVE;
-    MULC_Karatsuba(x, y, z);
-    x->sign = x_sign;
-    y->sign = y_sign;
-    (*z)->sign = (x->sign + y->sign) % 2;
+
+    bigint* x_ = NULL;
+    bigint* y_ = NULL;
+    bigint_assign(&x_, x);
+    bigint_assign(&y_, y);
+    
+    int x_sign = x_->sign;
+    int y_sign = y_->sign;
+    x_->sign = NON_NEGATVE;
+    y_->sign = NON_NEGATVE;
+    MULC_Karatsuba(x_, y_, z);
+    x_->sign = x_sign;
+    y_->sign = y_sign;
+    (*z)->sign = (x_->sign + y_->sign) % 2;
+
+    bigint_delete(&x_);
+    bigint_delete(&y_);
     return;
 }
 
@@ -550,89 +559,121 @@ void DIV(bigint* A, bigint* B, bigint** Q, bigint** R)
     bigint_delete(&qi);
 }
 
-
 void Single_percision_sqr(word A, bigint** C)
 {
+    bigint* c = NULL;
+    bigint_create(&c, 2);
 
     int worddiv2 = (WordBitLen >> 1);
     word A1 = A >> worddiv2;
     word A0 = A % (1 << worddiv2);
+    
     word C0 = A0 * A0;
     word C1 = A1 * A1;
-    (*C)->a[1] = (((A1 * A1) << WordBitLen) + (A0 * A0) + ((A0 * A1) << (worddiv2 + 1))) && (1 << WordBitLen);
-    (*C)->a[0] = (((A1 * A1) << WordBitLen) + (A0 * A0) + ((A0 * A1) << (worddiv2 + 1))) >> WordBitLen;
+    
+    c->a[1] = C1;
+    c->a[0] = C0;
+
+    bigint* T = NULL;
+    bigint_create(&T, 1);
+    T->a[0] = A0 * A1;
+    
+    LeftShift(T, worddiv2 + 1);
+    
+    ADD(c, T, &c);
+
+    bigint_assign(C, c);
+
+    bigint_delete(&T);
+    bigint_delete(&c);
 }
 
 void Sqr_Textbook(bigint* x, bigint** y)
 {
-    bigint** C1 = NULL; bigint** C2 = NULL;
-    bigint** T1 = NULL; bigint** T2 = NULL;
-
-    bigint_create(y, 2 * (x->wordlen));
-    bigint_create(T1, 2); bigint_create(T2, 2);
-    bigint_create(C1, 2 * (x->wordlen)); bigint_create(C2, 2 * (x->wordlen));
+    bigint* C1 = NULL; 
+    bigint* C2 = NULL;
+    bigint* T1 = NULL; 
+    bigint* T2 = NULL;
+    
+    bigint_create(&C1, 1);
+    bigint_create(&C2, 1);
+    
     int t = x->wordlen;
     for (int i = 0; i < t; i++)
     {
-        Single_percision_sqr(x->a[i], T1);
-        LeftShift(T1, 2 * i * sizeof(word));
+        Single_percision_sqr(x->a[i], &T1);
+        LeftShift(T1, 2 * i * WordBitLen);
+        ADD(T1, C1, &C1);
         for (int j = i + 1; j < (t - 1); j++)
         {
-            MUL_AB(x->a[i], x->a[j], T2);
-            LeftShift(T2, (i + j) * sizeof(word));
-            ADD(C2, T2, C2);
+            MUL_AB(&(x->a[i]), &(x->a[j]), &T2);
+            LeftShift(T2, (i + j) * WordBitLen);
+            ADD(C2, T2, &C2);
         }
-    }
+    }  
     LeftShift(C2, 1);
     ADD(C1, C2, y);
 
+    bigint_delete(&T2);
+    bigint_delete(&T1);
+    bigint_delete(&C2);
+    bigint_delete(&C1);
 }
-void SQUC(bigint* x, bigint** y)
+
+void SQU(bigint* x, bigint** y)
 {
-    if (x->wordlen == 0)
+    if (IsZero(x) || IsOne(x)){
         bigint_assign(y, x);
-    if (x->wordlen == 1)
-    {
-        bigint_create(y, 1);
-        (*y)->a[0] = 1;
-    }
-}
-void Sqr_karatsba(bigint* x, bigint** y)
-{
-    if (x->wordlen < 2)
-    {
-        SQUC(x, y);
+        (*y)->sign = NON_NEGATVE;
         return;
     }
-    bigint_create(y, 2 * (x->wordlen));
-    int xsign = x->sign;
-    x->sign = NON_NEGATVE;
-    int l = (x->wordlen + 1) >> 1;
-    bigint** A1 = NULL;
-    bigint** A0 = NULL;
-
-    bigint_assign(A0, x);
-    bigint_assign(A1, x);
-    RightShift(A1, l * (WordBitLen));
-    Reduction(A0, l * (WordBitLen));
-
-    bigint** T0 = NULL; bigint** T1 = NULL;
-    Sqr_karatsba(A1, T1);
-    Sqr_karatsba(A0, T0);
-
-    bigint** R = NULL; bigint** S = NULL;
-    LeftShift(T1, 2 * l * (WordBitLen));
-    ADD(T1, T0, R);
-    MULC_Karatsuba(A0, A1, S);
-    LeftShift(S, l * (WordBitLen)+1);
-    ADD(R, S, y);
+    return Sqr_karatsuba(x, y);
 }
+
+void Sqr_karatsuba(bigint* x, bigint** y)
+{
+    if (x->wordlen <= 10)
+    {
+        Sqr_Textbook(x, y);
+        return;
+    }
+
+    // bigint_create(y, 2 * (x->wordlen));
+    // int xsign = x->sign;
+    // x->sign = NON_NEGATVE;
+    
+    int l = (x->wordlen + 1) >> 1;
+    bigint* A1 = NULL;
+    bigint* A0 = NULL;
+    bigint_assign(&A0, x);
+    bigint_assign(&A1, x);
+    A0->sign = NON_NEGATVE;
+    A1->sign = NON_NEGATVE;
+
+    RightShift(A1, l * WordBitLen);
+    Reduction(A0, l * WordBitLen);
+
+    bigint* T0 = NULL; 
+    bigint* T1 = NULL;
+    Sqr_karatsuba(A1, &T1);
+    Sqr_karatsuba(A0, &T0);
+
+    bigint* R = NULL; 
+    bigint* S = NULL;
+    LeftShift(T1, 2 * l * WordBitLen);
+    ADD(T1, T0, &R);
+    MUL(A1, A0, &S);
+    LeftShift(S, l * WordBitLen +1);
+    ADDC(R, S, y);
+
+}
+
 void Exponentiation(bigint* x, int N, bigint** z)
 {
     bigint* t0 = NULL;
     bigint* t1 = NULL;
-    bigint_create(t0, 1);
-    bigint_assign(t1, x);
+    bigint_create(&t0, 1);
+    bigint_assign(&t1, x);
     t0->a[0] = 1;
 
     int l = x->wordlen;
@@ -640,13 +681,13 @@ void Exponentiation(bigint* x, int N, bigint** z)
     {
         if (N & 0x1 == 1)
         {
-            MULC_Karatsuba(t0, t1, t0);
-            Sqr_karatsba(t1, t1);
+            MUL(t0, t1, &t0);
+            Sqr_karatsuba(t1, &t1);
         }
         else
         {
-            MULC_Karatsuba(t0, t1, t1);
-            Sqr_karatsba(t0, t0);
+            MUL(t0, t1, &t1);
+            Sqr_karatsuba(t0, &t0);
         }
         N >> 1;
     }
@@ -654,12 +695,13 @@ void Exponentiation(bigint* x, int N, bigint** z)
 
 }
 
+/*
 void Exponentiation2(bigint* x, int N, bigint** z)
 {
     bigint* t0 = NULL;
     bigint* t1 = NULL;
-    bigint_create(t0, 1);
-    bigint_assign(t1, x);
+    bigint_create(&t0, 1);
+    bigint_assign(&t1, x);
     t0->a[0] = 0;
 
     int l = x->wordlen;
@@ -667,19 +709,20 @@ void Exponentiation2(bigint* x, int N, bigint** z)
     {
         if (N & 0x1 == 1)
         {
-            ADD(t0, t1, t0);
+            ADD(t0, t1, &t0);
             LeftShift(t1, 1);
         }
         else
         {
-            ADD(t0, t1, t1);
-            LeftShift(t0, t0);
+            ADD(t0, t1, &t1);
+            LeftShift(t0, t0); // 인자가 틀림
         }
         N >> 1;
     }
     bigint_assign(z, t0);
 
 }
+*/
 #if 0
 void Montgomery_reduction(bigint* x, bigint* N, bigint** z)
 {
