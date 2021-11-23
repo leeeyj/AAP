@@ -19,9 +19,9 @@ int main()
     // show_bigint_hex(B);
     // printf("\n"); 
 
-    SQU(A, &B);
-    printf("A^2 = ");
-    show_bigint_hex(B);
+    Sqr_karatsuba(A, &B);
+    // printf("A^2 = ");
+    // show_bigint_hex(B);
 
     // Division Testing
     // bigint* q = NULL;
