@@ -9,18 +9,17 @@ int main()
     bigint* B = NULL;
 
     // Test generate random bigint 
-    bigint_gen_rand(&A, NON_NEGATVE, 10);
-    bigint_create(&B, 10);
+    bigint_gen_rand(&A, NON_NEGATVE, 11);
+    // bigint_create(&B, 10);
 
     printf("A : ");
     show_bigint_hex(A);
     
-    printf("B : ");
-    show_bigint_hex(B);
-    printf("\n"); 
+    // printf("B : ");
+    // show_bigint_hex(B);
+    // printf("\n"); 
 
-  
-    Sqr_Textbook(A, B);
+    SQU(A, &B);
     printf("A^2 = ");
     show_bigint_hex(B);
 
@@ -38,7 +37,7 @@ int main()
     //show_bigint_hex(mul);
 
     // Test deleting bigint
-    bigint_delete(&A);
+    // bigint_delete(&A);
     bigint_delete(&B);
     // bigint_delete(&q);
     // bigint_delete(&r);
