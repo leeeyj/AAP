@@ -19,8 +19,8 @@ void MUL(bigint* x, bigint* y, bigint** z);
 // Bigint Squaring 
 void Single_percision_sqr(word A, bigint** C);
 void Sqr_Textbook(bigint* x, bigint** y);
-void Sqr_karatsba(bigint* x, bigint** y);
-void SQUC(bigint* x, bigint** y);
+void Sqr_karatsuba(bigint* x, bigint** y);
+void SQU(bigint* x, bigint** y);
 
 //bigint modulo exponential
 void Exponentiation(bigint* x, int N, bigint** z);
