@@ -12,8 +12,8 @@ unsigned char* array2string(bigint* x)
     if (s2 != NULL) memset(s2, 0, sizeof(word) * 2 * (x->wordlen) + 1);
 
     for (int i = (x->wordlen) - 1; i >= 0; i--) {
-        sprintf(s1, "%08x", x->a[i]);
-        strcat(s2, s1);
+        if (s1 != 0) sprintf(s1, "%08x", x->a[i]);
+        if (s2 != 0 && s1 != 0) strcat(s2, s1);
         if (s1 != NULL) memset(s1, 0, sizeof(word) * 2 + 1);
     }
     free(s1);
@@ -37,6 +37,7 @@ int main()
             for (int i = 1; i < 100001; i++) {                               // 100000번 테스트
                 bigint* A = NULL; 
                 bigint_gen_rand(&A, NON_NEGATVE, 20);
+                // show_bigint_hex(A);
                 bigint* B = NULL;              
                 Sqr_karatsuba(A, &B);
                 // bigint* mul = NULL;
