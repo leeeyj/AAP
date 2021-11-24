@@ -23,8 +23,8 @@ void Sqr_karatsuba(bigint* x, bigint** y);
 void SQU(bigint* x, bigint** y);
 
 //bigint modulo exponential
-void Exponentiation(bigint* x, int N, bigint** z);
-void Exponentiation2(bigint* x, int N, bigint** z);
+void Exponentiation(bigint* x, bigint* N, bigint** z, bigint* M);
+// void Exponentiation2(bigint* x, int N, bigint** z);
 //void Modular_Exponentiation(bigint* x, int N, bigint** z);
 //void Montgomery_reduction(bigint* x, bigint* N,bigint**z);
 

@@ -11,7 +11,7 @@ void bigint_create(bigint** x, int wordlen)
     if (*x != NULL) {
         (*x)->sign = NON_NEGATVE;
         (*x)->wordlen = wordlen;
-        (*x)->a = (word*)calloc(wordlen, sizeof(word));  // 메모리를 0으로 초기화 
+        (*x)->a = (word*)calloc(wordlen, sizeof(word));  
         // printf("Success..");
     } else{
         // printf("Fail..");
@@ -110,7 +110,7 @@ void show_bigint_bin(bigint* x)
         word t = x->a[i];
         for(int j=0;j<WordBitLen;j++)
         {
-            if((t>>j)&(0x1) ==1)
+            if((t>>j)&&(0x1) ==1)
                 printf("1");
             else
                 printf("0"); 
@@ -132,24 +132,32 @@ void bigint_refine(bigint* x)
         new_wordlen--;
     }
 
+    if ((new_wordlen == 1) && (x->a[0] == 0x00))
+        x->sign = NON_NEGATVE;
+
+    word* tmp = NULL;
     if (x->wordlen != new_wordlen){
         x->wordlen = new_wordlen;
-        x->a = (word*)realloc(x->a, sizeof(word)*new_wordlen);
+        tmp = x->a;
+        x->a = (word*)realloc(x->a, sizeof(word) * new_wordlen);
+        if (x->a == NULL) {
+            printf("Memory Reallocation Fail\n");
+            x->a = tmp;
+        }
     }
-
-    if((x->wordlen == 1) && (x->a[0] == 0x0))
-        x->sign = NON_NEGATVE;
+    
+   
 }
 
 // Assign Bigint //
 void bigint_assign(bigint** y, bigint* x)
 {
-    if((*y) != NULL)              // bigint y가 비어있지 않다면..?
-        bigint_delete(y);       // bigint y를 비우고 
+    if((*y) != NULL)              
+        bigint_delete(y);       
     
-    bigint_create(y, x->wordlen);       // y를 x의 word길이 만큼 새로 만들기  
-    (*y)->sign = x->sign;               // y에 x의 부호 할당 (음수, 양수 판단)
-    array_copy((*y)->a, x->a, x->wordlen);      // array_copy(y의 word 배열의 시작 주소, x의 word배열의 시작 주소 위치, 얼만큼 복사?)
+    bigint_create(y, x->wordlen);       
+    (*y)->sign = x->sign;               
+    array_copy((*y)->a, x->a, x->wordlen);      
 }
 
 // Generate Random Bigint //
@@ -217,7 +225,6 @@ void bigint_set_zero(bigint** x)
     (*x)->a[0] = 0x00;    
 }
 
-// IsZero? IsOne? 이거 뭐하는 함수죠...? //
 bool IsZero(bigint* x)
 {
     /*
@@ -296,47 +303,42 @@ int Compare(bigint* x, bigint* y)
     
 }
 
-void LeftShift(bigint* A, int r)
+void LeftShift(bigint* A, word r)
 {   
     // Case1 (r = WordBitLen * k)
-    if (r % WordBitLen == 0){
-        A->a = (word*)realloc(A->a, sizeof(word) * (r / WordBitLen + A->wordlen));
+    if (r % WordBitLen == 0) {
+        bigint* B = NULL;
+        bigint_create(&B, (r / WordBitLen) + A->wordlen);
 
-        memmove(&(A->a[r / WordBitLen]), &(A->a[0]), sizeof(word) * A->wordlen);
-        A->wordlen += r / WordBitLen;
-        for (int i = 0; i < r / WordBitLen; i++){
-            A->a[i] = 0;
+        for (int i = (r / WordBitLen); i <= B->wordlen - 1; i++) {
+            B->a[i] = A->a[i - (r / WordBitLen)];
         }
-        bigint_refine(A);
-        return;
-    } 
-
-    // Case 2 (r = WordBitLen * k + r')
-    if (r % WordBitLen != 0){
-        A->a = (word*)realloc(A->a, sizeof(word) * (r / WordBitLen + A->wordlen + 1));
-
-        word t1 = A->a[0] >> (WordBitLen - (r % WordBitLen)); 
-        A->a[0] = A->a[0] << (r % WordBitLen);
-
-        for (int i = 1; i < A->wordlen; i++){
-            word t2 = A->a[i] >> (WordBitLen - (r % WordBitLen)); 
-            A->a[i] = (A->a[i] << (r % WordBitLen)) | t1;
-            t1 = t2;
-            t2 = 0;
-        }
-        A->a[A->wordlen] = t1;
-        t1 = 0; 
-        
-        memmove(&(A->a[r / WordBitLen]), &(A->a[0]), sizeof(word) * (A->wordlen + 1));
-
-        A->wordlen += (r / WordBitLen + 1);
-        for (int i = 0; i < (r / WordBitLen); i++){
-            A->a[i] = 0;
-        }
-        bigint_refine(A);
+        bigint_refine(B);
+        bigint temp = *A;
+        *A = *B;
+        *B = temp;
+        bigint_delete(&B);
         return;
     }
-    
+
+    // Case 2 (r = WordBitLen * k + r')
+    if (r % WordBitLen != 0) {
+        bigint* B = NULL;
+        bigint_create(&B, A->wordlen + (r / WordBitLen) + 1);
+        B->a[r / WordBitLen] = A->a[0] << (r % WordBitLen);
+        for (int i = (r / WordBitLen) + 1; i <= B->wordlen - 2; i++) {
+            B->a[i] = ((A->a[i - (r / WordBitLen)] << (r % WordBitLen)) + (A->a[i - (r / WordBitLen) - 1] >> (WordBitLen - (r % WordBitLen))));
+        }
+        B->a[B->wordlen - 1] = A->a[A->wordlen - 1] >> (WordBitLen - (r % WordBitLen));
+        bigint_refine(B);
+
+        bigint temp = *A;
+        *A = *B;
+        *B = temp;
+        
+        bigint_delete(&B);
+        return;
+    }
 }
 
 void RightShift(bigint* A, int r)
@@ -352,7 +354,7 @@ void RightShift(bigint* A, int r)
 
     // Case2 (r = WordBitLen * k)
     if (r % WordBitLen == 0 && r < o){
-        memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * (A->wordlen - r / WordBitLen));
+        memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * ((unsigned long long)A->wordlen - r / WordBitLen));
         for (int i = A->wordlen - (r / WordBitLen); i < A->wordlen; i++){
             A->a[i] = 0;
         }
@@ -373,7 +375,7 @@ void RightShift(bigint* A, int r)
         }
         t1 = 0;
 
-        memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * (A->wordlen - r / WordBitLen));
+        memmove(&(A->a[0]), &(A->a[r / WordBitLen]), sizeof(word) * ((unsigned long long)A->wordlen - r / WordBitLen));
         for (int i = A->wordlen - r / WordBitLen; i < A->wordlen; i++){
             A->a[i] = 0;
         }

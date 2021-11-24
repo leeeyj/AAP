@@ -18,7 +18,14 @@ void ADD_ABC(word* x, word* y, int* c, word* C)
 
 void ADDC(bigint* x, bigint* y, bigint** z)
 {   
+    word* tmp = NULL;
+    tmp = y->a;
     y->a = (word*)realloc(y->a, sizeof(word)*(x->wordlen));
+    if (y->a == NULL) {
+        printf("Memory Reallocation Fail\n");
+        y->a = tmp;
+        return;
+    }
     for (int j = y->wordlen; j < x->wordlen; j++){
         y->a[j] = 0;
     }
@@ -101,7 +108,14 @@ void SUB_AbB(word* A, word* B, int* b, word* C)
 
 void SUBC(bigint* A, bigint* B, bigint** z)
 {
+    word* tmp = NULL;
+    tmp = B->a;
     B->a = (word*)realloc(B->a, sizeof(word) * (A->wordlen));
+    if (B->a == NULL) {
+        printf("Memory Reallocation Fail");
+        B->a = tmp;
+        return;
+    }
     for (int j = B->wordlen; j < A->wordlen; j++) {
         B->a[j] = 0;
     }
@@ -260,8 +274,8 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z)
 
 void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
 {   
-    // wordlen이 충분히 길지 않으면 Naive Version으로 연산하는 것이 더 빠르다
-    if (x->wordlen <= 10 | y->wordlen <= 10){
+   
+    if (x->wordlen <= 10 || y->wordlen <= 10){
         MULC_Naive(x, y, z);
         return;
     }
@@ -360,23 +374,14 @@ void MUL(bigint* x, bigint* y, bigint** z)
         (*z)->sign = (x->sign + y->sign) % 2;
         return;
     }
-
-    bigint* x_ = NULL;
-    bigint* y_ = NULL;
-    bigint_assign(&x_, x);
-    bigint_assign(&y_, y);
-    
-    int x_sign = x_->sign;
-    int y_sign = y_->sign;
-    x_->sign = NON_NEGATVE;
-    y_->sign = NON_NEGATVE;
-    MULC_Karatsuba(x_, y_, z);
-    x_->sign = x_sign;
-    y_->sign = y_sign;
-    (*z)->sign = (x_->sign + y_->sign) % 2;
-
-    bigint_delete(&x_);
-    bigint_delete(&y_);
+    int x_sign = x->sign;
+    int y_sign = y->sign;
+    x->sign = NON_NEGATVE;
+    y->sign = NON_NEGATVE;
+    MULC_Karatsuba(x, y, z);
+    x->sign = x_sign;
+    y->sign = y_sign;
+    (*z)->sign = (x->sign + y->sign) % 2;
     return;
 }
 
@@ -405,7 +410,7 @@ void Long_Division(bigint* A, bigint* B, bigint** Q)
         else{
             LeftShift(r, 1);
             r->a[0] += (A0 >> i) & 0x01;
-            if (Compare(r, B) == 1 | Compare(r, B) == 0){
+            if (Compare(r, B) == 1 || Compare(r, B) == 0){
                 q->a[0] += (word)(1<<i);
                 SUB(r, B, &r);
             }
@@ -577,9 +582,7 @@ void Single_percision_sqr(word A, bigint** C)
     bigint* T = NULL;
     bigint_create(&T, 1);
     T->a[0] = A0 * A1;
-    
     LeftShift(T, worddiv2 + 1);
-    
     ADD(c, T, &c);
 
     bigint_assign(C, c);
@@ -603,8 +606,8 @@ void Sqr_Textbook(bigint* x, bigint** y)
     {
         Single_percision_sqr(x->a[i], &T1);
         LeftShift(T1, 2 * i * WordBitLen);
-        ADD(T1, C1, &C1);
-        for (int j = i + 1; j < (t - 1); j++)
+        ADD(C1, T1, &C1);
+        for (int j = i + 1; j < t; j++)
         {
             MUL_AB(&(x->a[i]), &(x->a[j]), &T2);
             LeftShift(T2, (i + j) * WordBitLen);
@@ -627,20 +630,18 @@ void SQU(bigint* x, bigint** y)
         (*y)->sign = NON_NEGATVE;
         return;
     }
-    return Sqr_karatsuba(x, y);
+
+    Sqr_Textbook(x, y);
+    return;
 }
 
 void Sqr_karatsuba(bigint* x, bigint** y)
 {
     if (x->wordlen <= 10)
     {
-        Sqr_Textbook(x, y);
+        SQU(x, y);
         return;
     }
-
-    // bigint_create(y, 2 * (x->wordlen));
-    // int xsign = x->sign;
-    // x->sign = NON_NEGATVE;
     
     int l = (x->wordlen + 1) >> 1;
     bigint* A1 = NULL;
@@ -653,22 +654,42 @@ void Sqr_karatsuba(bigint* x, bigint** y)
     RightShift(A1, l * WordBitLen);
     Reduction(A0, l * WordBitLen);
 
+    // printf("A1 : "); show_bigint_hex(A1);
+    // printf("A0 : "); show_bigint_hex(A0);
+
     bigint* T0 = NULL; 
     bigint* T1 = NULL;
     Sqr_karatsuba(A1, &T1);
     Sqr_karatsuba(A0, &T0);
 
+    // printf("T1 : "); show_bigint_hex(T1);
+    // printf("T0 : "); show_bigint_hex(T0);
+
     bigint* R = NULL; 
     bigint* S = NULL;
     LeftShift(T1, 2 * l * WordBitLen);
     ADD(T1, T0, &R);
-    MUL(A1, A0, &S);
-    LeftShift(S, l * WordBitLen +1);
-    ADDC(R, S, y);
+    // printf("R : "); show_bigint_hex(R);
 
+    MULC_Karatsuba(A1, A0, &S);
+    // printf("S : "); show_bigint_hex(S);
+
+    LeftShift(S, l * WordBitLen +1);
+    // printf("S : "); show_bigint_hex(S);
+    
+    ADDC(R, S, y);
+    // printf("C : "); show_bigint_hex((*y));
+
+
+    bigint_delete(&A1);
+    bigint_delete(&A0);
+    bigint_delete(&T0);
+    bigint_delete(&T1);
+    bigint_delete(&R);
+    bigint_delete(&S);
 }
 
-void Exponentiation(bigint* x, int N, bigint** z)
+void Exponentiation(bigint* x, bigint* N, bigint** z, bigint* M)
 {
     bigint* t0 = NULL;
     bigint* t1 = NULL;
@@ -676,70 +697,47 @@ void Exponentiation(bigint* x, int N, bigint** z)
     bigint_assign(&t1, x);
     t0->a[0] = 1;
 
-    int l = x->wordlen;
-    for (int i = l - 1; i > 0; i--)
-    {
-        if (N & 0x1 == 1)
-        {
+    bigint* N_ = NULL;
+    bigint_assign(&N_, N);
+    int l = 0;
+    while(!IsZero(N_)){
+        l += 1;
+        RightShift(N_, 1);
+    }
+    bigint_delete(&N_);
+
+    bigint* Q = NULL;
+    bigint* R = NULL;
+
+    for (int i = l-1; i >= 0; i--){
+        if (((N->a[i/N->wordlen]) >> (i % WordBitLen)) & 0x1)
+        {   
             MUL(t0, t1, &t0);
-            Sqr_karatsuba(t1, &t1);
+            DIV(t0, M, &Q, &R);
+            bigint_assign(&t0, R);
+            MUL(t1, t1, &t1);
+            DIV(t1, M, &Q, &R);
+            bigint_assign(&t1, R);
         }
         else
         {
             MUL(t0, t1, &t1);
-            Sqr_karatsuba(t0, &t0);
+            DIV(t1, M, &Q, &R);
+            bigint_assign(&t1, R);
+            MUL(t0, t0, &t0);
+            DIV(t0, M, &Q, &R);
+            bigint_assign(&t0, R);
         }
-        N >> 1;
     }
+
+
+
+
+
     bigint_assign(z, t0);
 
+    bigint_delete(&t0);
+    bigint_delete(&t1);
+    bigint_delete(&Q);
+    bigint_delete(&R);
 }
-
-/*
-void Exponentiation2(bigint* x, int N, bigint** z)
-{
-    bigint* t0 = NULL;
-    bigint* t1 = NULL;
-    bigint_create(&t0, 1);
-    bigint_assign(&t1, x);
-    t0->a[0] = 0;
-
-    int l = x->wordlen;
-    for (int i = l - 1; i < 0; i--)
-    {
-        if (N & 0x1 == 1)
-        {
-            ADD(t0, t1, &t0);
-            LeftShift(t1, 1);
-        }
-        else
-        {
-            ADD(t0, t1, &t1);
-            LeftShift(t0, t0); // 인자가 틀림
-        }
-        N >> 1;
-    }
-    bigint_assign(z, t0);
-
-}
-*/
-#if 0
-void Montgomery_reduction(bigint* x, bigint* N, bigint** z)
-{
-    bigint** R = NULL;
-    while (1)
-    {
-        bigint_gen_rand(R, NON_NEGATVE, N->wordlen);
-        if (gcd(R, N) == 1)
-        {
-            if (Compare(N, R) == -1)
-            {
-                break;
-            }
-        }
-    }
-    //exgcd(R,N)  ==>>> N' 값 구하고 mod R===> 하위 R->wordlen
-
-
-}
-#endif
