@@ -47,7 +47,8 @@ void ADDC(bigint* x, bigint* y, bigint** z)
 
     bigint_refine(sum);                 // reallocation bigint sum
     bigint_refine(y);
-    bigint_assign(z, sum);    
+    bigint_assign(z, sum); 
+    (*z)->sign = x->sign;   
     bigint_delete(&sum);
 }
 
@@ -82,12 +83,30 @@ void ADD(bigint* x, bigint* y, bigint** z)
     }
 
     if (x->wordlen >= y->wordlen){
-        ADDC(x, y, z);
+        bigint* x_ = NULL;
+        bigint* y_ = NULL;
+
+        bigint_assign(&x_, x);
+        bigint_assign(&y_, y);
+
+        ADDC(x_, y_, z);
+
+        bigint_delete(&y_);
+        bigint_delete(&x_);
         return;
     }
 
     if (x->wordlen < y->wordlen){
-        ADDC(y, x, z);
+        bigint* x_ = NULL;
+        bigint* y_ = NULL;
+
+        bigint_assign(&x_, x);
+        bigint_assign(&y_, y);
+
+        ADDC(y_, x_, z);
+
+        bigint_delete(&y_);
+        bigint_delete(&x_);
         return;
     } 
 }
@@ -186,7 +205,7 @@ void SUB(bigint* x, bigint* y, bigint** z)
         bigint_assign(&y_, y);    
         x_->sign = NON_NEGATVE;
         y_->sign = NON_NEGATVE;
-        SUBC(x,y,z);
+        SUBC(x_,y_,z);
         (*z)->sign = NEGATIVE;
         bigint_delete(&x_);
         bigint_delete(&y_);
@@ -198,17 +217,17 @@ void SUB(bigint* x, bigint* y, bigint** z)
         bigint* y_ = NULL;
         bigint_assign(&y_, y);
         y_->sign = NON_NEGATVE;
-        ADD(x,y,z);
+        ADD(x,y_,z);
+        (*z)->sign = NON_NEGATVE;
         bigint_delete(&y_);
-
         return;
     }
     if((x->sign == NEGATIVE)&&(y->sign == NON_NEGATVE))
     {   
         bigint* x_ = NULL;
-        bigint_assign(&x_, y);
+        bigint_assign(&x_, x);
         x_->sign = NON_NEGATVE;
-        ADD(x,y,z);
+        ADD(x_,y,z);
         (*z)->sign = NEGATIVE;        
         bigint_delete(&x_);
         return;
@@ -255,19 +274,17 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z)
 {
     bigint* mul = NULL;
     bigint_create(&mul, (x->wordlen + y->wordlen));
-    mul->a[0] = 0;
 
     for (int i = 0; i < x->wordlen; i++){
         for (int j = 0; j < y->wordlen; j++){
             bigint* T = NULL;
             MUL_AB(&(x->a[i]), &(y->a[j]), &T);       // 여기 수정함 11/15 AM11:50
             LeftShift(T, WordBitLen * (i + j));
-            if (T->wordlen <= mul->wordlen) ADDC(mul, T, &mul);
-            else ADDC(T, mul, &mul);
+            if (T->wordlen <= mul->wordlen) ADD(mul, T, &mul);
+            else ADD(T, mul, &mul);
             bigint_delete(&T);
         }
     }
-
     bigint_assign(z, mul);
     bigint_delete(&mul); 
 }
