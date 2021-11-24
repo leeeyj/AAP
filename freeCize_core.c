@@ -300,7 +300,6 @@ int Compare(bigint* x, bigint* y)
         return ret;
     
     return ret * (-1);
-    
 }
 
 void LeftShift(bigint* A, word r)
@@ -309,6 +308,7 @@ void LeftShift(bigint* A, word r)
     if (r % WordBitLen == 0) {
         bigint* B = NULL;
         bigint_create(&B, (r / WordBitLen) + A->wordlen);
+        B->sign = A->sign;
 
         for (int i = (r / WordBitLen); i <= B->wordlen - 1; i++) {
             B->a[i] = A->a[i - (r / WordBitLen)];
@@ -325,6 +325,7 @@ void LeftShift(bigint* A, word r)
     if (r % WordBitLen != 0) {
         bigint* B = NULL;
         bigint_create(&B, A->wordlen + (r / WordBitLen) + 1);
+        B->sign = A->sign;
         B->a[r / WordBitLen] = A->a[0] << (r % WordBitLen);
         for (int i = (r / WordBitLen) + 1; i <= B->wordlen - 2; i++) {
             B->a[i] = ((A->a[i - (r / WordBitLen)] << (r % WordBitLen)) + (A->a[i - (r / WordBitLen) - 1] >> (WordBitLen - (r % WordBitLen))));
