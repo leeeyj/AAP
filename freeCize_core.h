@@ -4,6 +4,22 @@
 #include <time.h>
 #include <stdbool.h>
 
+/*
+
+    A basic functions for bigint.
+    WordBitLen means the size of one word. 
+    You can define 8 / 32 /64 bit
+
+    Create a bigint of an array of word units.
+    At this time, the sign value and wordlen are set.
+    You can define Negative or Nonnegative for sign. 
+
+    Component: bigint_create / bigint_delete / array_copy bigint_set(array, string, one, zero) / bigint_assign / bigint_refine
+               show_bigint(hex, bin) / generate random bigint( bigint_rand, array_rand) / Is_zero& Is_one / Compare 
+               Leftshift & RightShift / Reduction ( calculation of mod 2^r) 
+
+*/
+
 #define WordBitLen 32
 #define NON_NEGATVE 0
 #define NEGATIVE 1
