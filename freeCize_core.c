@@ -81,14 +81,14 @@ void show_bigint_hex(bigint *x)
     #elif WordBitLen == 8
     // Case 2: word is unsigned char
     for  (int i = (x->wordlen) -1 ; i >=0; i--){
-        printf("%02x", x->a[i])
+        printf("%02x", x->a[i]);
     }
     printf("\n");
 
     #elif WordBitLen == 64
     // Case 3 : word is unsigned long long 
     for  (int i = (x->wordlen) -1 ; i >=0; i--){
-        printf("%016x", x->a[i])
+        printf("%016llx", x->a[i]);
     }
     printf("\n");
 
@@ -174,41 +174,13 @@ void array_rand(word* dst, int wordlen)
 {
     byte* p = (byte*)dst;
     int cnt = wordlen * sizeof(word);
-    srand(time(NULL));                      // Seed = Current time
-    // srand(0);
     while(cnt > 0)
     {
-        *p = rand() & 0xff;                 // rand() is not safe, use "srand(time(NULL))",  
+        *p = rand() & 0xff;                 
         p++;
         cnt--;
     }
 }
-
-/**/
-// Only for Testing
-void bigint_gen_rand1(bigint** x, int sign, int wordlen)
-{
-    bigint_create(x, wordlen);
-    (*x)->sign = sign;
-    array_rand1((*x)->a, wordlen);
-
-    bigint_refine(*x);
-}
-
-void array_rand1(word* dst, int wordlen)
-{
-    byte* p = (byte*)dst;
-    int cnt = wordlen * sizeof(word);
-    srand(time(NULL)+1);                      // Seed = Current time
-    // srand(0);
-    while(cnt > 0)
-    {
-        *p = rand() & 0xff;                 // rand() is not safe, use "srand(time(NULL))",  
-        p++;
-        cnt--;
-    }
-}
-/**/
 
 // Set one, Set Zero //
 void bigint_set_one(bigint** x)
@@ -302,7 +274,7 @@ int Compare(bigint* x, bigint* y)
     return ret * (-1);
 }
 
-void LeftShift(bigint* A, word r)
+void LeftShift(bigint* A, int r)
 {   
     // Case1 (r = WordBitLen * k)
     if (r % WordBitLen == 0) {
@@ -409,8 +381,8 @@ void Reduction(bigint* A, int r)
         for (int i = k+1; i < len; i++) {
             A->a[i] = 0;
         } 
-        q = (1 << r0) - 1;
-        printf("%x", q);
+        q = ((unsigned long long)1 << r0) - 1;
+        printf("%llx", q);
         A->a[k] = A->a[k] & q;
         bigint_refine(A);
         return;
