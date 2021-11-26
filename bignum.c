@@ -27,6 +27,37 @@ int main()
     *                                                                                                                                                                    *
     **********************************************************************************************************************************************************************
     */
-    
+    srand(time(NULL));
+
+    bigint* A = NULL;
+    bigint* B = NULL;
+    for(int i = 0; i < 100; i++){
+        bigint_gen_rand(&A, NON_NEGATVE, 40);
+        bigint_gen_rand(&B, NON_NEGATVE, 39);
+
+        printf("A = 0x");
+        show_bigint_hex(A);
+
+        printf("B = 0x");
+        show_bigint_hex(B);
+
+        bigint* Q = NULL;
+        bigint* R = NULL;
+        DIV(A, B, &Q, &R);
+
+        printf("Q = 0x");
+        show_bigint_hex(Q);
+
+        printf("R = 0x");
+        show_bigint_hex(R);
+
+        bigint_delete(&R);
+        bigint_delete(&Q);
+
+        bigint_delete(&B);
+        bigint_delete(&A);
+
+    }
+
     return 0;
 }
