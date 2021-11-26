@@ -37,7 +37,6 @@ void ADDC(bigint* x, bigint* y, bigint** z)
     for (int j = 0; j < x->wordlen; j++){                       // Updating carry and C
         ADD_ABC(&(x->a[j]), &(y->a[j]), &carry, &C);
         sum->a[j] = C;
-        // show_bigint_hex(sum);
         C = 0;
     }
     
@@ -54,57 +53,51 @@ void ADDC(bigint* x, bigint* y, bigint** z)
 
 void ADD(bigint* x, bigint* y, bigint** z)
 {   
-    if (IsZero(x)){
-        bigint_assign(z, y);
+    bigint* x_ = NULL;
+    bigint* y_ = NULL;
+
+    bigint_assign(&x_, x);
+    bigint_assign(&y_, y);
+
+    if (IsZero(x_)){
+        bigint_assign(z, y_);
+        bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
 
-    if (IsZero(y)){
-        bigint_assign(z, x);
+    if (IsZero(y_)){
+        bigint_assign(z, x_);
+        bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     } 
 
-    if ((!IsZero(x) && x->sign == NON_NEGATVE) && (!IsZero(y) && y->sign == NEGATIVE)){
-        bigint* y_ = NULL;
-        bigint_assign(&y_, y);
+    if ((!IsZero(x_) && x_->sign == NON_NEGATVE) && (!IsZero(y_) && y_->sign == NEGATIVE)){
         y_->sign = NON_NEGATVE;
-        SUB(x, y_, z);
+        SUB(x_, y_, z);
+        bigint_delete(&x_);
         bigint_delete(&y_);
         return;
     }
  
-    if ((!IsZero(y) && y->sign == NON_NEGATVE) && (!IsZero(x) && x->sign == NEGATIVE)){
-        bigint* x_ = NULL;
-        bigint_assign(&x_, x);
+    if ((!IsZero(y_) && y_->sign == NON_NEGATVE) && (!IsZero(x_) && x_->sign == NEGATIVE)){
         x_->sign = NON_NEGATVE;
-        SUB(y, x_, z);
+        SUB(y_, x_, z);
         bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
 
-    if (x->wordlen >= y->wordlen){
-        bigint* x_ = NULL;
-        bigint* y_ = NULL;
-
-        bigint_assign(&x_, x);
-        bigint_assign(&y_, y);
-
+    if (x_->wordlen >= y_->wordlen){
         ADDC(x_, y_, z);
-
         bigint_delete(&y_);
         bigint_delete(&x_);
         return;
     }
 
-    if (x->wordlen < y->wordlen){
-        bigint* x_ = NULL;
-        bigint* y_ = NULL;
-
-        bigint_assign(&x_, x);
-        bigint_assign(&y_, y);
-
+    if (x_->wordlen < y_->wordlen){
         ADDC(y_, x_, z);
-
         bigint_delete(&y_);
         bigint_delete(&x_);
         return;
@@ -157,39 +150,51 @@ void SUBC(bigint* A, bigint* B, bigint** z)
 }
 
 void SUB(bigint* x, bigint* y, bigint** z)
-{
-    if (IsZero(x)){
-        bigint_assign(z, y);
+{   
+    bigint* x_ = NULL;
+    bigint* y_ = NULL;
+
+    bigint_assign(&x_, x);
+    bigint_assign(&y_, y);
+
+    if (IsZero(x_)){
+        bigint_assign(z, y_);
         (*z)->sign = NEGATIVE; 
+        bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
-    if (IsZero(y)){
-        bigint_assign(z, x);
+    if (IsZero(y_)){
+        bigint_assign(z, x_);
         (*z)->sign = NON_NEGATVE; 
+        bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
-    if(Compare(x,y)==0){
+    if(Compare(x_,y_)==0){
         bigint_set_zero(z);
+        bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
-    if((y->sign==NON_NEGATVE)&&(x->sign==NON_NEGATVE)&&(Compare(x,y) != -1) )
+    if((y_->sign==NON_NEGATVE)&&(x_->sign==NON_NEGATVE)&&(Compare(x_,y_) != -1) )
     {
-        SUBC(x,y,z);
+        SUBC(x_,y_,z);
         (*z)->sign = NON_NEGATVE;
+        bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
-    if((x->sign == NON_NEGATVE)&&(y->sign==NON_NEGATVE)&&(Compare(x,y)==-1))
+    if((x_->sign == NON_NEGATVE)&&(y_->sign==NON_NEGATVE)&&(Compare(x_,y_)==-1))
     {
-        SUBC(y,x,z);
+        SUBC(y_,x_,z);
         (*z)->sign = NEGATIVE;
+        bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
-    if((x->sign==NEGATIVE)&&(y->sign==NEGATIVE)&&(Compare(x,y)!=-1))
-    {
-        bigint* x_ = NULL;
-        bigint* y_ = NULL;
-        bigint_assign(&x_, x);
-        bigint_assign(&y_, y);    
+    if((x_->sign==NEGATIVE)&&(y_->sign==NEGATIVE)&&(Compare(x_,y_)!=-1))
+    {   
         x_->sign = NON_NEGATVE;
         y_->sign = NON_NEGATVE;
         SUBC(y_,x_,z);
@@ -197,12 +202,8 @@ void SUB(bigint* x, bigint* y, bigint** z)
         bigint_delete(&y_);
         return;
     }
-    if((y->sign==NEGATIVE)&&(x->sign==NEGATIVE)&&(Compare(x,y)==-1))
-    {
-        bigint* x_ = NULL;
-        bigint* y_ = NULL;
-        bigint_assign(&x_, x);
-        bigint_assign(&y_, y);    
+    if((y_->sign==NEGATIVE)&&(x_->sign==NEGATIVE)&&(Compare(x_,y_)==-1))
+    {  
         x_->sign = NON_NEGATVE;
         y_->sign = NON_NEGATVE;
         SUBC(x_,y_,z);
@@ -212,24 +213,22 @@ void SUB(bigint* x, bigint* y, bigint** z)
         return;
     }
 
-    if((x->sign == NON_NEGATVE)&&(y->sign == NEGATIVE))
+    if((x_->sign == NON_NEGATVE)&&(y_->sign == NEGATIVE))
     {
-        bigint* y_ = NULL;
-        bigint_assign(&y_, y);
         y_->sign = NON_NEGATVE;
-        ADD(x,y_,z);
+        ADD(x_,y_,z);
         (*z)->sign = NON_NEGATVE;
+        bigint_delete(&x_);
         bigint_delete(&y_);
         return;
     }
-    if((x->sign == NEGATIVE)&&(y->sign == NON_NEGATVE))
+    if((x_->sign == NEGATIVE)&&(y_->sign == NON_NEGATVE))
     {   
-        bigint* x_ = NULL;
-        bigint_assign(&x_, x);
         x_->sign = NON_NEGATVE;
-        ADD(x_,y,z);
+        ADD(x_,y_,z);
         (*z)->sign = NEGATIVE;        
         bigint_delete(&x_);
+        bigint_delete(&y_);
         return;
     }
 }
@@ -241,10 +240,10 @@ void MUL_AB(word* x, word* y, bigint** z)
     bigint_create(&mul, 2);
 
     word A1 = (*x) >> (WordBitLen / 2); 
-    word A0 = (*x) & (word)((1 << (WordBitLen / 2)) - 1);
+    word A0 = (*x) & (((unsigned long long)1 << (WordBitLen / 2)) - 1);
     
     word B1 = (*y) >> (WordBitLen / 2); 
-    word B0 = (*y) & (word)((1 << (WordBitLen / 2)) - 1);
+    word B0 = (*y) & (((unsigned long long)1 << (WordBitLen / 2)) - 1);
     
     word T1 = A1 * B0;
     word T0 = A0 * B1;
@@ -278,13 +277,14 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z)
     for (int i = 0; i < x->wordlen; i++){
         for (int j = 0; j < y->wordlen; j++){
             bigint* T = NULL;
-            MUL_AB(&(x->a[i]), &(y->a[j]), &T);       // 여기 수정함 11/15 AM11:50
+            MUL_AB(&(x->a[i]), &(y->a[j]), &T);       
             LeftShift(T, WordBitLen * (i + j));
-            if (T->wordlen <= mul->wordlen) ADD(mul, T, &mul);
-            else ADD(T, mul, &mul);
-            bigint_delete(&T);
+            // show_bigint_hex(T);
+            ADD(mul, T, &mul);
+            // bigint_delete(&T);
         }
     }
+
     bigint_assign(z, mul);
     bigint_delete(&mul); 
 }
@@ -418,8 +418,8 @@ void Long_Division(bigint* A, bigint* B, bigint** Q)
     word A0 = A->a[0];
 
     for (int i = WordBitLen - 1; i >= 0; i--){
-        if (r->a[0] >= (word)(1<<(WordBitLen-1))){
-            q->a[0] += (word)(1<<i);
+        if (r->a[0] >= ((unsigned long long)1<<(WordBitLen-1))){
+            q->a[0] += ((unsigned long long)1<<i);
             LeftShift(r, 1);
             r->a[0] += (A0 >> i) & 0x01;
             SUB(r, B, &r);
@@ -428,7 +428,7 @@ void Long_Division(bigint* A, bigint* B, bigint** Q)
             LeftShift(r, 1);
             r->a[0] += (A0 >> i) & 0x01;
             if (Compare(r, B) == 1 || Compare(r, B) == 0){
-                q->a[0] += (word)(1<<i);
+                q->a[0] += ((unsigned long long)1<<i);
                 SUB(r, B, &r);
             }
         }
@@ -520,11 +520,13 @@ void DIVC(bigint* A, bigint* B, bigint** Q, bigint** R)
         bigint_assign(R, A_);
 
         bigint_delete(&q);
+        bigint_delete(&B_);
+        bigint_delete(&A_);
         return;
     }
 
     int k = 0;
-    while(B_->a[B_->wordlen - 1] <= (1 << (WordBitLen - 1))){
+    while(B_->a[B_->wordlen - 1] < ((unsigned long long)1 << (WordBitLen - 1))){
         LeftShift(A_, 1);
         LeftShift(B_, 1);
         k += 1;
@@ -588,7 +590,7 @@ void Single_percision_sqr(word A, bigint** C)
 
     int worddiv2 = (WordBitLen >> 1);
     word A1 = A >> worddiv2;
-    word A0 = A % (1 << worddiv2);
+    word A0 = A % ((unsigned long long)1 << worddiv2);
     
     word C0 = A0 * A0;
     word C1 = A1 * A1;
@@ -642,13 +644,18 @@ void Sqr_Textbook(bigint* x, bigint** y)
 
 void SQU(bigint* x, bigint** y)
 {
-    if (IsZero(x) || IsOne(x)){
-        bigint_assign(y, x);
+    bigint* x_ = NULL;
+    bigint_assign(&x_, x);
+
+    if (IsZero(x_) || IsOne(x_)){
+        bigint_assign(y, x_);
         (*y)->sign = NON_NEGATVE;
+        bigint_delete(&x_);
         return;
     }
 
-    Sqr_Textbook(x, y);
+    Sqr_karatsuba(x_, y);
+    bigint_delete(&x_);
     return;
 }
 
@@ -656,7 +663,7 @@ void Sqr_karatsuba(bigint* x, bigint** y)
 {
     if (x->wordlen <= 10)
     {
-        SQU(x, y);
+        Sqr_Textbook(x, y);
         return;
     }
     
