@@ -29,7 +29,7 @@ typedef char byte;
 typedef unsigned char word;
 #elif WordBitLen == 32
 typedef unsigned int word;
-#elif WordBitLen == 64;
+#elif WordBitLen == 64
 typedef unsigned long long word;
 #endif
 
@@ -64,9 +64,6 @@ void bigint_refine(bigint* x);                  // bigint memory reallocation
 // generate random bigint
 void bigint_gen_rand(bigint** x, int sign, int wordlen);                // Generate Random bigint
 void array_rand(word* dst, int wordlen);                                // Generate Random word array
-// Only for Testing generate random bigint
-void bigint_gen_rand1(bigint** x, int sign, int wordlen);
-void array_rand1(word* dst, int wordlen);
 
 // Assign Bigint 
 void bigint_assign(bigint** y, bigint* x);          // Assign bigint ( y <- x )
@@ -91,7 +88,7 @@ int Compare(bigint* x, bigint* y);              // Compare two integer
                                                 */
 
 // Left/Right shift Bigint 
-void LeftShift(bigint* A, word r);
+void LeftShift(bigint* A, int r);
 void RightShift(bigint* A, int r); 
 
 // Reduction : A mod 2 ^ r
