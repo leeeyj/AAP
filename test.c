@@ -2,8 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <Windows.h>
-#include "./freeCize.h"
+#include "./Enterstellar_operation.h"
 #include "./includePython.h"
+#include <crtdbg.h>
 
 unsigned char* array2string(bigint* x)
 {
@@ -60,8 +61,8 @@ void ADD_test()
             for (int i = 1; i < 100001; i++) {                              // 100000번 테스트
                 bigint* A = NULL;
                 bigint* B = NULL;
-                bigint_gen_rand(&A, rand() & 0x01, 20);
-                bigint_gen_rand(&B, rand() & 0x01, 20);
+                bigint_gen_rand(&A, rand() & 0x01, 40);
+                bigint_gen_rand(&B, rand() & 0x01, 40);
 
                 bigint* Add = NULL;
                 ADD(A, B, &Add);
@@ -589,7 +590,7 @@ int main()
 {   
     /*=========================================================================================================================================================*/
     // Setting Up Python for testing only
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     printf("<                                           %d-bit Version Testing                                   >\n\n", WordBitLen);
     ADD_test();
     SUB_test();
