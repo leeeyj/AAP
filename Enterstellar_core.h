@@ -20,7 +20,7 @@
 
 */
 
-#define WordBitLen 32
+#define WordBitLen 64
 #define NON_NEGATVE 0
 #define NEGATIVE 1
 typedef char byte;
