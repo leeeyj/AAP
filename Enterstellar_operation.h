@@ -145,7 +145,7 @@ void SQU(bigint* x, bigint** y);						//Processing for 0,1,-1
 
 //bigint modulo exponential
 void Exponentiation(bigint* x, bigint* N, bigint** z, bigint* M);
-// void Exponentiation2(bigint* x, int N, bigint** z);
+void Exponentiation2(bigint* x, bigint* N, bigint** z, bigint* M);
 //void Modular_Exponentiation(bigint* x, int N, bigint** z);
 //void Montgomery_reduction(bigint* x, bigint* N,bigint**z);
 

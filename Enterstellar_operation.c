@@ -756,13 +756,13 @@ void Exponentiation(bigint* x, bigint* N, bigint** z, bigint* M)
     bigint* Q2 = NULL;
     bigint* R2 = NULL;
     for (int i = l-1; i >= 0; i--){
-        if (((N->a[i/N->wordlen]) >> (i % WordBitLen)) && 0x1 == 1)
+        if ((((N->a[i/WordBitLen]) >> (i % WordBitLen)) & 0x1) == 1)
         {   
             MUL(t0, t1, &t0_);
             bigint_assign(&t0, t0_);
             DIV(t0, M, &Q1, &R1);
             bigint_assign(&t0, R1);
-            MUL(t1, t1, &t1_);
+            Sqr_karatsuba(t1, &t1_);
             bigint_assign(&t1, t1_);
             DIV(t1, M, &Q2, &R2);
             bigint_assign(&t1, R2);
@@ -773,7 +773,7 @@ void Exponentiation(bigint* x, bigint* N, bigint** z, bigint* M)
             bigint_assign(&t1, t1_);
             DIV(t1, M, &Q1, &R1);
             bigint_assign(&t1, R1);
-            MUL(t0, t0, &t0_);
+            Sqr_karatsuba(t0, &t0_);
             bigint_assign(&t0, t0_);
             DIV(t0, M, &Q2, &R2);
             bigint_assign(&t0, R2);
@@ -790,6 +790,77 @@ void Exponentiation(bigint* x, bigint* N, bigint** z, bigint* M)
     bigint_delete(&t1);
     bigint_delete(&t0_);
     bigint_delete(&t1_);
+    bigint_delete(&Q1);
+    bigint_delete(&R1);
+    bigint_delete(&Q2);
+    bigint_delete(&R2);
+    bigint_delete(&N_);
+}
+
+
+void Exponentiation2(bigint* x, bigint* N, bigint** z, bigint* M)
+{
+    bigint* t0 = NULL;
+    bigint* t1 = NULL;
+
+    
+    bigint_create(&t0, 1);
+    bigint_assign(&t1, x);
+
+    bigint* N_ = NULL;
+    bigint_assign(&N_, N);
+    int l = 0;
+    while (!IsZero(N_)) {
+        l += 1;
+        RightShift(N_, 1);
+    }
+    bigint_delete(&N_);
+
+    bigint* Q1 = NULL;
+    bigint* R1 = NULL;
+
+    bigint* Q2 = NULL;
+    bigint* R2 = NULL;
+    for (int i = l - 1; i >= 0; i--) {
+        bigint* t0_ = NULL;
+        bigint* t1_ = NULL;
+        if ((((N->a[i / WordBitLen]) >> (i % WordBitLen)) & 0x1) == 0x1)
+        {
+            ADD(t0, t1, &t0_);
+            bigint_assign(&t0, t0_);
+            DIV(t0, M, &Q1, &R1);
+            bigint_assign(&t0, R1);
+
+            ADD(t1, t1, &t1_);
+            bigint_assign(&t1, t1_);
+            DIV(t1, M, &Q2, &R2);
+            bigint_assign(&t1, R2);
+        }
+        else
+        {
+            ADD(t0, t1, &t1_);
+            bigint_assign(&t1, t1_);
+            DIV(t1, M, &Q1, &R1);
+            bigint_assign(&t1, R1);
+
+            ADD(t0, t0, &t0_);
+            bigint_assign(&t0, t0_);
+            DIV(t0, M, &Q2, &R2);
+            bigint_assign(&t0, R2);
+        }
+        bigint_delete(&t0_);
+        bigint_delete(&t1_);
+    }
+
+
+
+
+
+    bigint_assign(z, t0);
+
+    bigint_delete(&t0);
+    bigint_delete(&t1);
+ 
     bigint_delete(&Q1);
     bigint_delete(&R1);
     bigint_delete(&Q2);

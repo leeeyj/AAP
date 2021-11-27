@@ -20,7 +20,7 @@
 
 */
 
-#define WordBitLen 64
+#define WordBitLen 32
 #define NON_NEGATVE 0
 #define NEGATIVE 1
 typedef char byte;
@@ -51,11 +51,10 @@ void bigint_delete(bigint** x);                     // bigint free memory
 // bigint setting 
 void array_copy(word* A, word* T, int wordlen);                             // Copy word array
 void bigint_set_by_array(bigint** x, int sign, word* t, int wordlen);       // bigint setting by word array
-void bigint_set_by_string(bigint** x, int sign, char* str, int base);       // bigint setting by string
+
 
 // print bigint
 void show_bigint_hex(bigint* x);                // show bigint to hex
-void show_bigint_dec(bigint* x);                // show bigint to decimal
 void show_bigint_bin(bigint* x);                // show bigint to binary
 
 // refine bigint, use realloc
