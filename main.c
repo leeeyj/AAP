@@ -28,8 +28,22 @@ int main()
     *                                                                                                                                                                    *
     **********************************************************************************************************************************************************************
     */
-    srand(time(NULL));
+    srand((unsigned long long)time(NULL));
     
+    bigint* A = NULL;
+    bigint* B = NULL;
+    
+    bigint_gen_rand(&A, NON_NEGATVE, 2);
+    bigint_gen_rand(&B, NON_NEGATVE, 2);
+
+    printf("A = 0x");
+    show_bigint_hex(A);
+    printf("B = 0x");
+    show_bigint_hex(B);
+
+    bigint_delete(&B);
+    bigint_delete(&A);
+
 
     // _CrtDumpMemoryLeaks();
 
