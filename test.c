@@ -479,7 +479,12 @@ void DIV_test()
                 bigint* B = NULL;
                 bigint_gen_rand(&A, NON_NEGATVE, 40);
                 bigint_gen_rand(&B, NON_NEGATVE, 39);
-
+                while (IsZero(B)) {
+                    bigint* B_ = NULL;
+                    bigint_gen_rand(&B_, NON_NEGATVE, 1);
+                    bigint_assign(&B, B_);
+                    bigint_delete(&B_);
+                }
                 bigint* Q = NULL;
                 bigint* R = NULL;
                 DIV(A, B, &Q, &R);
@@ -579,12 +584,257 @@ void DIV_test()
     return;
 }
 
-void ModularExponentiation_test()
+void ModularExponentiation1_test()
 {
+    PyObject* pName, * pModule, * pFunc, * pValue, * pA, * A_sign, * pN, * N_sign, * pB, * B_sign, *pM, *M_sign;
+    Py_Initialize();
+    if (Py_IsInitialized()) {                                               // Python 인터프리터 초기화 확인 
+#if WordBitLen == 8
+        pName = PyUnicode_FromString("test_8bit_version");                              // Python File name -> test1.py, 초기화 필요! 
+#elif WordBitLen == 32
+        pName = PyUnicode_FromString("test_32bit_version");
+#elif WordBitLen == 64
+        pName = PyUnicode_FromString("test_64bit_version");
+#endif
+        pModule = PyImport_Import(pName);                                   // Import Python File            초기화 필요!
+        pFunc = PyObject_GetAttrString(pModule, "Modular_exponentiation1");                   // test1.py에 있는 add 함수 (= 함수 이름)  초기화 필요!
+        if (PyCallable_Check(pFunc)) {                                      // 함수가 잘 불러져 왔는지 확인
+            printf("Modular Exponentiation Testing\n");
+            printf("Progress : ");
+            for (int i = 1; i < 100001; i++) {                              // 100000번 테스트
+                bigint* A = NULL;
+                bigint* N = NULL;
+                bigint* M = NULL;
+                bigint_gen_rand(&A, NON_NEGATVE, 1);
+                bigint_gen_rand(&N, NON_NEGATVE, 1);
+                bigint_gen_rand(&M, NON_NEGATVE, 1);
+                while (IsZero(M)) {
+                    bigint* M_ = NULL;
+                    bigint_gen_rand(&M_, NON_NEGATVE, 1);
+                    bigint_assign(&M, M_);
+                    bigint_delete(&M_);
+                }
+                bigint* B = NULL;
+                Exponentiation(A, N, &B, M);
 
+                unsigned char* string_A = array2string(A);
+                pA = PyUnicode_FromString(string_A);                     // 매개 변수 생성, c언어 문자열을 파이썬 문자열로 변환 
+                A_sign = Py_BuildValue("i", A->sign);
+
+                unsigned char* string_N = array2string(N);
+                pN = PyUnicode_FromString(string_N);
+                N_sign = Py_BuildValue("i", N->sign);
+
+                unsigned char* string_M = array2string(M);
+                pM = PyUnicode_FromString(string_M);
+                M_sign = Py_BuildValue("i", M->sign);
+
+                unsigned char* string_B = array2string(B);
+                pB = PyUnicode_FromString(string_B);
+                B_sign = Py_BuildValue("i", B->sign);
+
+                // A, A_sign, B, B_sign, sum, sum_sign
+                pValue = PyObject_CallFunctionObjArgs(pFunc, pA, A_sign, pN, N_sign, pB, B_sign, pM, M_sign, NULL);     // 파이썬 mul_k 함수 실행 ( 매개 변수 여러 개 전달 ) 초기화 필요!
+                if (!PyLong_AsLong(pValue) || PyLong_AsLong(pValue) == -1) {
+                    printf("\nError");
+                    printf("\n");
+
+                    if (PyLong_AsLong(pValue) == -1) printf("\nPython Return Error");
+
+                    Py_DECREF(B_sign);
+                    Py_DECREF(pB);
+                    free(string_B);
+
+                    Py_DECREF(M_sign);
+                    Py_DECREF(pM);
+                    free(string_M);
+
+                    Py_DECREF(N_sign);
+                    Py_DECREF(pN);
+                    free(string_N);
+
+                    Py_DECREF(A_sign);
+                    Py_DECREF(pA);
+                    free(string_A);
+
+                    bigint_delete(&B);
+                    bigint_delete(&M);
+                    bigint_delete(&N);
+                    bigint_delete(&A);
+
+                    Py_DECREF(pFunc);
+                    Py_DECREF(pModule);
+                    Py_DECREF(pName);
+
+                    Py_Finalize();
+                    return;
+                }
+
+                if (i % 1000 == 0) {
+                    printf("=");
+                }
+
+                Py_DECREF(B_sign);
+                Py_DECREF(pB);
+                free(string_B);
+
+                Py_DECREF(M_sign);
+                Py_DECREF(pM);
+                free(string_M);
+
+                Py_DECREF(N_sign);
+                Py_DECREF(pN);
+                free(string_N);
+
+                Py_DECREF(A_sign);
+                Py_DECREF(pA);
+                free(string_A);
+
+                bigint_delete(&B);
+                bigint_delete(&M);
+                bigint_delete(&N);
+                bigint_delete(&A);
+
+            }
+            printf("\nModular Exponentiation Test Success\n\n");
+        }
+        else {
+            PyErr_Print();  // Python 함수 호출 실패시, 에러 출력    
+        }
+        Py_DECREF(pFunc);
+        Py_DECREF(pModule);
+        Py_DECREF(pName);
+    }
+    Py_Finalize();          // Python 인터프리터 초기화 실패시, 종료 
+
+    return;
 
 }
 
+void ModularExponentiation2_test() {
+    PyObject* pName, * pModule, * pFunc, * pValue, * pA, * A_sign, * pN, * N_sign, * pB, * B_sign, * pM, * M_sign;
+    Py_Initialize();
+    if (Py_IsInitialized()) {                                               // Python 인터프리터 초기화 확인 
+#if WordBitLen == 8
+        pName = PyUnicode_FromString("test_8bit_version");                              // Python File name -> test1.py, 초기화 필요! 
+#elif WordBitLen == 32
+        pName = PyUnicode_FromString("test_32bit_version");
+#elif WordBitLen == 64
+        pName = PyUnicode_FromString("test_64bit_version");
+#endif
+        pModule = PyImport_Import(pName);                                   // Import Python File            초기화 필요!
+        pFunc = PyObject_GetAttrString(pModule, "Modular_exponentiation2");                   // test1.py에 있는 add 함수 (= 함수 이름)  초기화 필요!
+        if (PyCallable_Check(pFunc)) {                                      // 함수가 잘 불러져 왔는지 확인
+            printf("Modular Exponentiation2 Testing\n");
+            printf("Progress : ");
+            for (int i = 1; i < 100001; i++) {                              // 100000번 테스트
+                bigint* A = NULL;
+                bigint* N = NULL;
+                bigint* M = NULL;
+                bigint_gen_rand(&A, NON_NEGATVE, 1);
+                bigint_gen_rand(&N, NON_NEGATVE, 1);
+                bigint_gen_rand(&M, NON_NEGATVE, 1);
+                while (IsZero(M)) {
+                    bigint* M_ = NULL;
+                    bigint_gen_rand(&M_, NON_NEGATVE, 1);
+                    bigint_assign(&M, M_);
+                    bigint_delete(&M_);
+                }
+                bigint* B = NULL;
+                Exponentiation2(A, N, &B, M);
+
+                unsigned char* string_A = array2string(A);
+                pA = PyUnicode_FromString(string_A);                     // 매개 변수 생성, c언어 문자열을 파이썬 문자열로 변환 
+                A_sign = Py_BuildValue("i", A->sign);
+
+                unsigned char* string_N = array2string(N);
+                pN = PyUnicode_FromString(string_N);
+                N_sign = Py_BuildValue("i", N->sign);
+
+                unsigned char* string_M = array2string(M);
+                pM = PyUnicode_FromString(string_M);
+                M_sign = Py_BuildValue("i", M->sign);
+
+                unsigned char* string_B = array2string(B);
+                pB = PyUnicode_FromString(string_B);
+                B_sign = Py_BuildValue("i", B->sign);
+
+                // A, A_sign, B, B_sign, sum, sum_sign
+                pValue = PyObject_CallFunctionObjArgs(pFunc, pA, A_sign, pN, N_sign, pB, B_sign, pM, M_sign, NULL);     // 파이썬 mul_k 함수 실행 ( 매개 변수 여러 개 전달 ) 초기화 필요!
+                if (!PyLong_AsLong(pValue) || PyLong_AsLong(pValue) == -1) {
+                    printf("\nError");
+                    printf("\n");
+
+                    if (PyLong_AsLong(pValue) == -1) printf("\nPython Return Error");
+
+                    Py_DECREF(B_sign);
+                    Py_DECREF(pB);
+                    free(string_B);
+
+                    Py_DECREF(M_sign);
+                    Py_DECREF(pM);
+                    free(string_M);
+
+                    Py_DECREF(N_sign);
+                    Py_DECREF(pN);
+                    free(string_N);
+
+                    Py_DECREF(A_sign);
+                    Py_DECREF(pA);
+                    free(string_A);
+
+                    bigint_delete(&B);
+                    bigint_delete(&M);
+                    bigint_delete(&N);
+                    bigint_delete(&A);
+
+                    Py_DECREF(pFunc);
+                    Py_DECREF(pModule);
+                    Py_DECREF(pName);
+
+                    Py_Finalize();
+                    return;
+                }
+
+                if (i % 1000 == 0) {
+                    printf("=");
+                }
+
+                Py_DECREF(B_sign);
+                Py_DECREF(pB);
+                free(string_B);
+
+                Py_DECREF(M_sign);
+                Py_DECREF(pM);
+                free(string_M);
+
+                Py_DECREF(N_sign);
+                Py_DECREF(pN);
+                free(string_N);
+
+                Py_DECREF(A_sign);
+                Py_DECREF(pA);
+                free(string_A);
+
+                bigint_delete(&B);
+                bigint_delete(&M);
+                bigint_delete(&N);
+                bigint_delete(&A);
+
+            }
+            printf("\nModular Exponentiation2 Test Success\n\n");
+        }
+        else {
+            PyErr_Print();  // Python 함수 호출 실패시, 에러 출력    
+        }
+        Py_DECREF(pFunc);
+        Py_DECREF(pModule);
+        Py_DECREF(pName);
+    }
+    Py_Finalize();          // Python 인터프리터 초기화 실패시, 종료 
+
+    return;
+}
 
 int main()
 {   
@@ -597,6 +847,8 @@ int main()
     MUL_test();
     SQU_test();
     DIV_test();
+    ModularExponentiation1_test();
+    ModularExponentiation2_test();
     printf("<                                              Test Complete!!!                                      >\n");
     return 0;
 }

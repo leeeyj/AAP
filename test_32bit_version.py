@@ -195,5 +195,47 @@ def sqr(a, a_sign, b, b_sign):
         print("Answer : ", hex(s))
         return 0
 
+
+def Modular_exponentiation1(a, a_sign, n, n_sign, b, b_sign, m, m_sign):
+    if m_sign == 1 or n_sign == 1 or a_sign == 1 or b_sign == 1:
+        print("Sign Error")
+        return 0
+    
+    bigint_a = int(a, 16)
+    bigint_n = int(n, 16)
+    bigint_m = int(m, 16)
+
+    answer = 0
+    answer = pow(bigint_a, bigint_n, bigint_m)
+    if hex(answer) == hex(int(b, 16)):
+        return 1
+    else:
+        print("\nAnswer = ", hex(answer))
+        print("A = ", hex(bigint_a))
+        print("N = ", hex(bigint_n))
+        print("M = ", hex(bigint_m))
+        print("My Answer = ", hex(int(b, 16)))
+        return 0
+
+def Modular_exponentiation2(a, a_sign, n, n_sign, b, b_sign, m, m_sign):
+    if m_sign == 1 or n_sign == 1 or a_sign == 1 or b_sign == 1:
+        print("Sign Error")
+        return 0
+
+    bigint_a = int(a, 16)
+    bigint_n = int(n, 16)
+    bigint_m = int(m, 16)
+
+    answer = ((bigint_a) * (bigint_n)) % bigint_m
+    if hex(answer) == hex(int(b, 16)):
+        return 1
+    else:
+        print("\nAnswer = ", hex(answer))
+        print("A = ", hex(bigint_a))
+        print("N = ", hex(bigint_n))
+        print("M = ", hex(bigint_m))
+        print("My Answer = ", hex(int(b, 16)))
+        return 0
+
 # if __name__=="__main__":
 #     mul_k("80", "50", 0)
