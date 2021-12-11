@@ -50,26 +50,9 @@ void bigint_set_by_string(bigint** x, int sign, char* str, int base)    // Setti
     memset((*x)->a,strtoul(str, NULL, base),strlen(str)*sizeof(word));
 }
 #endif
-void bigint_set_by_string(bigint** x, int sign, char* str, int base)    // Setting bigint by string //base mean is a of x^a 
-{
-    int size = strlen(str);
-    int byte_size = WordBitLen>>3;
-    size = size/byte_size;
-    if(size%byte_size != 0 )
-    {
-        size++;
-    }
-    bigint_create(x, size);
-    (*x)->sign = sign;
-    for(int i=0;i<size*byte_size;i+=byte_size)
-    {
-        // memset((*x)->a,strtoul(str, NULL, base),strlen(str)*sizeof(word));
-        //please your opinion. -keonhee
-    }
-}
 
 // Show(print) Bigint //
-void show_bigint_hex(bigint *x)
+void show_bigint_hex(bigint *x) //Big number Hexadecimal version
 {   
     #if WordBitLen == 32
     // Case 1: word is unsigned int
@@ -95,13 +78,7 @@ void show_bigint_hex(bigint *x)
     #endif
 }
 
-void show_bigint_dec(bigint* x)
-{
-    // we need to make bigint to decimal func
-    // idk.... sorry
-}
-
-void show_bigint_bin(bigint* x)
+void show_bigint_bin(bigint* x) //Big number inary version
 {
     int len = x->wordlen;
     printf("0b");
@@ -170,7 +147,7 @@ void bigint_gen_rand(bigint** x, int sign, int wordlen)
     bigint_refine(*x);
 }
 
-void array_rand(word* dst, int wordlen)
+void array_rand(word* dst, int wordlen) //Bignumber is randomly created
 {
     byte* p = (byte*)dst;
     int cnt = wordlen * sizeof(word);
@@ -197,7 +174,7 @@ void bigint_set_zero(bigint** x)
     (*x)->a[0] = 0x00;    
 }
 
-bool IsZero(bigint* x)
+bool IsZero(bigint* x) //only 0 is true
 {
     /*
     if (x->sign == 1 || x->a[0] != 0)
@@ -214,7 +191,7 @@ bool IsZero(bigint* x)
     return true;
 }
 
-bool IsOne(bigint* x)
+bool IsOne(bigint* x) //only 1 is true
 {
     /*
     if (x->sign == 1 || x->a[0] != 1)
@@ -274,7 +251,7 @@ int Compare(bigint* x, bigint* y)
     return ret * (-1);
 }
 
-void LeftShift(bigint* A, int r)
+void LeftShift(bigint* A, int r) //left shift operation
 {   
     // Case1 (r = WordBitLen * k)
     if (r % WordBitLen == 0) {
@@ -314,7 +291,7 @@ void LeftShift(bigint* A, int r)
     }
 }
 
-void RightShift(bigint* A, int r)
+void RightShift(bigint* A, int r) //right shift operation
 {   
     int o = WordBitLen * A->wordlen; 
     // Case1 (r >= WordBitLen * A->wordlen)
@@ -357,7 +334,7 @@ void RightShift(bigint* A, int r)
     }
 }
 
-void Reduction(bigint* A, int r)
+void Reduction(bigint* A, int r) // reduction operation
 {
     // case 1 : r >= WordBitLen * wordlen
     // no needed
