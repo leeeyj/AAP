@@ -4,7 +4,7 @@
 
 void ADD_ABC(word* x, word* y, unsigned int* c, word* C)
 {   
-    int carry = (*c);
+    unsigned int carry = (*c);
     (*c) = 0;
     (*C) = ((*x) + (*y));               // (A + B) mod 2 ^ WordBitLen
     if ((*C) < (*x)) (*c) = 1;    
@@ -29,9 +29,9 @@ void ADDC(bigint* x, bigint* y, bigint** z)
         y->a[j] = 0;
     }
     word C = 0;                                 // C is (x[j] + y[j]) mod 2 ^ WordBitLen
-    bigint* sum = NULL;                         // a + b 저장할 sum 생성 
-    bigint_create(&sum, x->wordlen + 1);        // To save A + B, 최대 max(n, m) + 1 wordlen need
-    int carry = 0;
+    bigint* sum = NULL;                         // a + b -> sum
+    bigint_create(&sum, x->wordlen + 1);        // To save A + B, max(n, m) + 1 wordlen need
+    unsigned int carry = 0;
 
     for (int j = 0; j < x->wordlen; j++){                       // Updating carry and C
         ADD_ABC(&(x->a[j]), &(y->a[j]), &carry, &C);
@@ -106,7 +106,7 @@ void ADD(bigint* x, bigint* y, bigint** z)
 //SUBTRACT//
 void SUB_AbB(word* A, word* B, unsigned int* b, word* C)
 {
-    int b_2 = 0;
+    unsigned int b_2 = 0;
     (*C) = ((*A) - (*b));              
     if ((*A) < (*b)) 
         b_2 = 1;
@@ -131,7 +131,7 @@ void SUBC(bigint* A, bigint* B, bigint** z)
         B->a[j] = 0;
     }
 
-    int b = 0;                              
+    unsigned int b = 0;                              
     word C = 0;                              
     bigint* sub = NULL;
     bigint_create(&sub, A->wordlen);       
