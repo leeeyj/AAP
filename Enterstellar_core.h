@@ -55,7 +55,6 @@ void bigint_set_by_string(bigint** x, int sign, char* str, int base);       // b
 
 // print bigint
 void show_bigint_hex(bigint* x);                // show bigint to hex
-void show_bigint_dec(bigint* x);                // show bigint to decimal
 void show_bigint_bin(bigint* x);                // show bigint to binary
 
 // refine bigint, use realloc
@@ -69,12 +68,12 @@ void array_rand(word* dst, int wordlen);                                // Gener
 void bigint_assign(bigint** y, bigint* x);          // Assign bigint ( y <- x )
 
 // Set One, Set Zero
-void bigint_set_one(bigint** x);                // ???
-void bigint_set_zero(bigint** x);               // ???
+void bigint_set_one(bigint** x);                
+void bigint_set_zero(bigint** x);              
 
 // IsZero? IsOne?
-bool IsZero(bigint* x);                 // ???
-bool IsOne(bigint* x);                  // ???
+bool IsZero(bigint* x);                
+bool IsOne(bigint* x);                  
 
 // Compare Two Bigint
 int CompareABS(bigint* x, bigint* y);           // Compare Absolute two integer 
