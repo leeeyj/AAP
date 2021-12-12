@@ -2,9 +2,9 @@
 
 // ADDITION //
 
-void ADD_ABC(word* x, word* y, int* c, word* C)
+void ADD_ABC(word* x, word* y, unsigned int* c, word* C)
 {   
-    int carry = (*c);
+    unsigned int carry = (*c);
     (*c) = 0;
     (*C) = ((*x) + (*y));               // (A + B) mod 2 ^ WordBitLen
     if ((*C) < (*x)) (*c) = 1;    
@@ -14,7 +14,6 @@ void ADD_ABC(word* x, word* y, int* c, word* C)
 
     carry = 0;
 }
-
 
 void ADDC(bigint* x, bigint* y, bigint** z)
 {   
@@ -30,9 +29,9 @@ void ADDC(bigint* x, bigint* y, bigint** z)
         y->a[j] = 0;
     }
     word C = 0;                                 // C is (x[j] + y[j]) mod 2 ^ WordBitLen
-    bigint* sum = NULL;                         // a + b 저장할 sum 생성 
-    bigint_create(&sum, x->wordlen + 1);        // To save A + B, 최대 max(n, m) + 1 wordlen need
-    int carry = 0;
+    bigint* sum = NULL;                         // a + b -> sum
+    bigint_create(&sum, x->wordlen + 1);        // To save A + B, max(n, m) + 1 wordlen need
+    unsigned int carry = 0;
 
     for (int j = 0; j < x->wordlen; j++){                       // Updating carry and C
         ADD_ABC(&(x->a[j]), &(y->a[j]), &carry, &C);
@@ -105,9 +104,9 @@ void ADD(bigint* x, bigint* y, bigint** z)
 }
 
 //SUBTRACT//
-void SUB_AbB(word* A, word* B, int* b, word* C)
+void SUB_AbB(word* A, word* B, unsigned int* b, word* C)
 {
-    int b_2 = 0;
+    unsigned int b_2 = 0;
     (*C) = ((*A) - (*b));              
     if ((*A) < (*b)) 
         b_2 = 1;
@@ -132,7 +131,7 @@ void SUBC(bigint* A, bigint* B, bigint** z)
         B->a[j] = 0;
     }
 
-    int b = 0;                              
+    unsigned int b = 0;                              
     word C = 0;                              
     bigint* sub = NULL;
     bigint_create(&sub, A->wordlen);       
@@ -290,7 +289,6 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z)
 
 void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
 {   
-    // wordlen이 충분히 길지 않으면 Naive Version으로 연산하는 것이 더 빠르다
     if (x->wordlen <= 10 || y->wordlen <= 10){
         MULC_Naive(x, y, z);
         return;
@@ -578,6 +576,11 @@ void DIV(bigint* A, bigint* B, bigint** Q, bigint** R)
         return;
     }
 
+    if (IsZero(B)) {
+        printf("\nDivision Zero Error\n");
+        return;
+    }
+
     bigint_create(&r, 1);
     r->a[0] = 0;
 
@@ -732,53 +735,121 @@ void Sqr_karatsuba(bigint* x, bigint** y)
 
 void Exponentiation(bigint* x, bigint* N, bigint** z, bigint* M)
 {
+    if (IsZero(M)) {
+        printf("Modular Zero Error");
+        return;
+    }
+    if (IsOne(M)) {
+        bigint* M_ = NULL;
+        bigint_create(&M_, 1);
+        M_->a[0] = 0;
+        bigint_assign(z, M_);
+        bigint_delete(&M_);
+        return;
+    }
     bigint* t0 = NULL;
     bigint* t1 = NULL;
+    
     bigint_create(&t0, 1);
     bigint_assign(&t1, x);
     t0->a[0] = 1;
 
     bigint* N_ = NULL;
     bigint_assign(&N_, N);
+    
     int l = 0;
-    while(!IsZero(N_)){
+    while (!IsZero(N_)) {
+        l += 1;
+        RightShift(N_, 1);
+    }
+    bigint_delete(&N_);
+    
+    for (int i = l - 1; i >= 0; i--) {
+        bigint* Q1 = NULL;
+        bigint* R1 = NULL;
+        bigint* Q2 = NULL;
+        bigint* R2 = NULL;
+        if ((((N->a[i / WordBitLen]) >> (i % WordBitLen)) & 0x1) == 1)
+        {
+            MUL(t0, t1, &t0);
+            DIV(t0, M, &Q1, &R1);
+            bigint_assign(&t0, R1);
+            SQU(t1, &t1);
+            DIV(t1, M, &Q2, &R2);
+            bigint_assign(&t1, R2);
+        }
+        else
+        {
+            MUL(t0, t1, &t1);
+            DIV(t1, M, &Q1, &R1);
+            bigint_assign(&t1, R1);
+            SQU(t0, &t0);
+            DIV(t0, M, &Q2, &R2);
+            bigint_assign(&t0, R2);
+        }
+        bigint_delete(&R2);
+        bigint_delete(&Q2);
+        bigint_delete(&R1);
+        bigint_delete(&Q1);
+    }
+    bigint_assign(z, t0);
+
+    bigint_delete(&t1);
+    bigint_delete(&t0);
+}
+
+void Exponentiation2(bigint* x, bigint* N, bigint** z, bigint* M)
+{
+
+    bigint* t0 = NULL;
+    bigint* t1 = NULL;
+
+    bigint_create(&t0, 1);
+    bigint_assign(&t1, x);
+
+    bigint* N_ = NULL;
+    bigint_assign(&N_, N);
+    int l = 0;
+    while (!IsZero(N_)) {
         l += 1;
         RightShift(N_, 1);
     }
     bigint_delete(&N_);
 
-    bigint* Q = NULL;
-    bigint* R = NULL;
+    
+    for (int i = l - 1; i >= 0; i--) {
+        bigint* Q1 = NULL;
+        bigint* R1 = NULL;
+        bigint* Q2 = NULL;
+        bigint* R2 = NULL;
+        if ((((N->a[i / WordBitLen]) >> (i % WordBitLen)) & 0x1) == 0x1)
+        {
+            ADD(t0, t1, &t0);
+            DIV(t0, M, &Q1, &R1);
+            bigint_assign(&t0, R1);
 
-    for (int i = l-1; i >= 0; i--){
-        if (((N->a[i/N->wordlen]) >> (i % WordBitLen)) & 0x1)
-        {   
-            MUL(t0, t1, &t0);
-            DIV(t0, M, &Q, &R);
-            bigint_assign(&t0, R);
-            MUL(t1, t1, &t1);
-            DIV(t1, M, &Q, &R);
-            bigint_assign(&t1, R);
+            ADD(t1, t1, &t1);
+            DIV(t1, M, &Q2, &R2);
+            bigint_assign(&t1, R2);
         }
         else
         {
-            MUL(t0, t1, &t1);
-            DIV(t1, M, &Q, &R);
-            bigint_assign(&t1, R);
-            MUL(t0, t0, &t0);
-            DIV(t0, M, &Q, &R);
-            bigint_assign(&t0, R);
+            ADD(t0, t1, &t1);
+            DIV(t1, M, &Q1, &R1);
+            bigint_assign(&t1, R1);
+
+            ADD(t0, t0, &t0);
+            DIV(t0, M, &Q2, &R2);
+            bigint_assign(&t0, R2);
         }
+        bigint_delete(&R2);
+        bigint_delete(&Q2);
+        bigint_delete(&R1);
+        bigint_delete(&Q1);
     }
-
-
-
-
 
     bigint_assign(z, t0);
 
-    bigint_delete(&t0);
     bigint_delete(&t1);
-    bigint_delete(&Q);
-    bigint_delete(&R);
+    bigint_delete(&t0);
 }
