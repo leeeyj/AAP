@@ -9,7 +9,7 @@ void bigint_create(bigint** x, int wordlen)
     *x = (bigint*)malloc(sizeof(bigint));
     
     if (*x != NULL) {
-        (*x)->sign = NON_NEGATVE;
+        (*x)->sign = NON_NEGATIVE;
         (*x)->wordlen = wordlen;
         (*x)->a = (word*)calloc(wordlen, sizeof(word));  
         // printf("Success..");
@@ -133,7 +133,7 @@ void bigint_refine(bigint* x)
     }
 
     if ((new_wordlen == 1) && (x->a[0] == 0x00))
-        x->sign = NON_NEGATVE;
+        x->sign = NON_NEGATIVE;
 
     word* tmp = NULL;
     if (x->wordlen != new_wordlen){
@@ -172,7 +172,7 @@ void bigint_gen_rand(bigint** x, int sign, int wordlen)
 
 void array_rand(word* dst, int wordlen)
 {
-    byte* p = (byte*)dst;
+    unsigned char* p = (unsigned char*)dst;
     int cnt = wordlen * sizeof(word);
     while(cnt > 0)
     {
@@ -186,14 +186,14 @@ void array_rand(word* dst, int wordlen)
 void bigint_set_one(bigint** x)
 {
     bigint_create(x, 1);
-    (*x)->sign = NON_NEGATVE;
+    (*x)->sign = NON_NEGATIVE;
     (*x)->a[0] = 0x01;
 }
 
 void bigint_set_zero(bigint** x)
 {
     bigint_create(x, 1);
-    (*x)->sign = NON_NEGATVE;
+    (*x)->sign = NON_NEGATIVE;
     (*x)->a[0] = 0x00;    
 }
 
@@ -260,15 +260,15 @@ int CompareABS(bigint* x, bigint* y)
 
 int Compare(bigint* x, bigint* y)
 {
-    if (x->sign == NON_NEGATVE && y->sign == NEGATIVE)
+    if (x->sign == NON_NEGATIVE && y->sign == NEGATIVE)
         return 1;
 
-    if (x->sign == NEGATIVE && y->sign == NON_NEGATVE)
+    if (x->sign == NEGATIVE && y->sign == NON_NEGATIVE)
         return -1;
     
     int ret = CompareABS(x, y);
 
-    if (x->sign == NON_NEGATVE)
+    if (x->sign == NON_NEGATIVE)
         return ret;
     
     return ret * (-1);
