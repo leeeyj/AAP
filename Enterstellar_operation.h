@@ -31,7 +31,7 @@ Bigint Addition : Single-Precision Addition & Multi-Precision Addition.
 
 */
 // Bigint Addition
-void ADD_ABC(word* x, word* y, unsigned int* c, word* C);             // Addition of Same signed Two Word
+void ADD_ABC(word* x, word* y, unsigned int* c, word* C);     // Addition of Same signed Two Word
 void ADDC(bigint* x, bigint* y, bigint** z);                 // Addition of Same Signed Two Integers
 void ADD(bigint* x, bigint* y, bigint** z);                  // Addition of Two Integers
 
@@ -96,7 +96,19 @@ void MUL(bigint* x, bigint* y, bigint** z);
 
 
 
+/*
+Bigint Division: Binary Long Division & Multi-Precision Long Division
 
+[Binary Long Division]
+		Long_Division: Division of 2word.
+			Input: bigint* A, bigint* B
+			Output: bigint* Q
+
+[Multi-Precision Long Division]
+		
+
+
+*/
 // Bigint Division
 void Long_Division(bigint* A, bigint* B, bigint** Q);
 void DIVCC(bigint* A, bigint* B, bigint** Q, bigint** R);
@@ -142,10 +154,25 @@ void SQU(bigint* x, bigint** y);						//Processing for 0,1,-1
 
 
 
+/*
 
+Bigint Modulo Exponentitation : Multiply-and Squaring Method & DIVSION 
+
+Exponentitation: z:= x^n mod M  
+Exponentitation2: z:= nx mod M
+
+*-* If you don't know Modulo Multiply-and Squaring Method, Look at this:
+Input: x,n,M
+output: x^n mod M
+	1. t0,t1 <- 1,x
+	2. for i <- l-1 down to 0 do
+	3.		t(1-ni) <- t0t1 mod M
+	4.		t(ni) <- {t(ni)}^2
+	5.end for
+	6. return t0
+*/
 //bigint modulo exponential
 void Exponentiation(bigint* x, bigint* N, bigint** z, bigint* M);
 void Exponentiation2(bigint* x, bigint* N, bigint** z, bigint* M);
-//void Modular_Exponentiation(bigint* x, int N, bigint** z);
-//void Montgomery_reduction(bigint* x, bigint* N,bigint**z);
+
 

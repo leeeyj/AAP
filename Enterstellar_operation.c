@@ -289,7 +289,7 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z)
 
 void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
 {   
-    // wordlen이 충분히 길지 않으면 Naive Version으로 연산하는 것이 더 빠르다
+
     if (x->wordlen <= 4 || y->wordlen <= 4){
         MULC_Naive(x, y, z);
         return;
