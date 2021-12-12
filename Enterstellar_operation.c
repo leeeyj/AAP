@@ -2,7 +2,7 @@
 
 // ADDITION //
 
-void ADD_ABC(word* x, word* y, int* c, word* C)
+void ADD_ABC(word* x, word* y, unsigned int* c, word* C)
 {   
     int carry = (*c);
     (*c) = 0;
@@ -72,16 +72,16 @@ void ADD(bigint* x, bigint* y, bigint** z)
         return;
     } 
 
-    if ((!IsZero(x_) && x_->sign == NON_NEGATVE) && (!IsZero(y_) && y_->sign == NEGATIVE)){
-        y_->sign = NON_NEGATVE;
+    if ((!IsZero(x_) && x_->sign == NON_NEGATIVE) && (!IsZero(y_) && y_->sign == NEGATIVE)){
+        y_->sign = NON_NEGATIVE;
         SUB(x_, y_, z);
         bigint_delete(&y_);
         bigint_delete(&x_);
         return;
     }
  
-    if ((!IsZero(y_) && y_->sign == NON_NEGATVE) && (!IsZero(x_) && x_->sign == NEGATIVE)){
-        x_->sign = NON_NEGATVE;
+    if ((!IsZero(y_) && y_->sign == NON_NEGATIVE) && (!IsZero(x_) && x_->sign == NEGATIVE)){
+        x_->sign = NON_NEGATIVE;
         SUB(y_, x_, z);
         bigint_delete(&y_);
         bigint_delete(&x_);
@@ -104,7 +104,7 @@ void ADD(bigint* x, bigint* y, bigint** z)
 }
 
 //SUBTRACT//
-void SUB_AbB(word* A, word* B, int* b, word* C)
+void SUB_AbB(word* A, word* B, unsigned int* b, word* C)
 {
     int b_2 = 0;
     (*C) = ((*A) - (*b));              
@@ -165,7 +165,7 @@ void SUB(bigint* x, bigint* y, bigint** z)
     }
     if (IsZero(y_)){
         bigint_assign(z, x_);
-        (*z)->sign = NON_NEGATVE; 
+        (*z)->sign = NON_NEGATIVE; 
         bigint_delete(&y_);
         bigint_delete(&x_);
         return;
@@ -176,15 +176,15 @@ void SUB(bigint* x, bigint* y, bigint** z)
         bigint_delete(&x_);
         return;
     }
-    if((y_->sign==NON_NEGATVE)&&(x_->sign==NON_NEGATVE)&&(Compare(x_,y_) != -1) )
+    if((y_->sign==NON_NEGATIVE)&&(x_->sign==NON_NEGATIVE)&&(Compare(x_,y_) != -1) )
     {
         SUBC(x_,y_,z);
-        (*z)->sign = NON_NEGATVE;
+        (*z)->sign = NON_NEGATIVE;
         bigint_delete(&y_);
         bigint_delete(&x_);
         return;
     }
-    if((x_->sign == NON_NEGATVE)&&(y_->sign==NON_NEGATVE)&&(Compare(x_,y_)==-1))
+    if((x_->sign == NON_NEGATIVE)&&(y_->sign==NON_NEGATIVE)&&(Compare(x_,y_)==-1))
     {
         SUBC(y_,x_,z);
         (*z)->sign = NEGATIVE;
@@ -194,8 +194,8 @@ void SUB(bigint* x, bigint* y, bigint** z)
     }
     if((x_->sign==NEGATIVE)&&(y_->sign==NEGATIVE)&&(Compare(x_,y_)!=-1))
     {   
-        x_->sign = NON_NEGATVE;
-        y_->sign = NON_NEGATVE;
+        x_->sign = NON_NEGATIVE;
+        y_->sign = NON_NEGATIVE;
         SUBC(y_,x_,z);
         bigint_delete(&y_);
         bigint_delete(&x_);
@@ -203,8 +203,8 @@ void SUB(bigint* x, bigint* y, bigint** z)
     }
     if((y_->sign==NEGATIVE)&&(x_->sign==NEGATIVE)&&(Compare(x_,y_)==-1))
     {  
-        x_->sign = NON_NEGATVE;
-        y_->sign = NON_NEGATVE;
+        x_->sign = NON_NEGATIVE;
+        y_->sign = NON_NEGATIVE;
         SUBC(x_,y_,z);
         (*z)->sign = NEGATIVE;
         bigint_delete(&y_);
@@ -212,18 +212,18 @@ void SUB(bigint* x, bigint* y, bigint** z)
         return;
     }
 
-    if((x_->sign == NON_NEGATVE)&&(y_->sign == NEGATIVE))
+    if((x_->sign == NON_NEGATIVE)&&(y_->sign == NEGATIVE))
     {
-        y_->sign = NON_NEGATVE;
+        y_->sign = NON_NEGATIVE;
         ADD(x_,y_,z);
-        (*z)->sign = NON_NEGATVE;
+        (*z)->sign = NON_NEGATIVE;
         bigint_delete(&y_);
         bigint_delete(&x_);
         return;
     }
-    if((x_->sign == NEGATIVE)&&(y_->sign == NON_NEGATVE))
+    if((x_->sign == NEGATIVE)&&(y_->sign == NON_NEGATIVE))
     {   
-        x_->sign = NON_NEGATVE;
+        x_->sign = NON_NEGATIVE;
         ADD(x_,y_,z);
         (*z)->sign = NEGATIVE;        
         bigint_delete(&y_);
@@ -290,7 +290,7 @@ void MULC_Naive(bigint* x, bigint* y, bigint** z)
 void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
 {   
     // wordlen이 충분히 길지 않으면 Naive Version으로 연산하는 것이 더 빠르다
-    if (x->wordlen <= 10 || y->wordlen <= 10){
+    if (x->wordlen <= 4 || y->wordlen <= 4){
         MULC_Naive(x, y, z);
         return;
     }
@@ -340,9 +340,9 @@ void MULC_Karatsuba(bigint* x, bigint* y, bigint** z)
         // printf("S0 : (%d) ", S0->sign); show_bigint_hex(S0);
 
         int S_sign = S1->sign ^ S0->sign;
-        S1->sign = NON_NEGATVE; S0->sign = NON_NEGATVE;
+        S1->sign = NON_NEGATIVE; S0->sign = NON_NEGATIVE;
         MULC_Karatsuba(S1, S0, &S);
-        if (S_sign == 0) S->sign = NON_NEGATVE;
+        if (S_sign == 0) S->sign = NON_NEGATIVE;
         if (S_sign == 1) S->sign = NEGATIVE;
         // printf("S : (%d) ", S->sign); show_bigint_hex(S);
 
@@ -406,8 +406,8 @@ void MUL(bigint* x, bigint* y, bigint** z)
     }
     int x_sign = x_->sign;
     int y_sign = y_->sign;
-    x_->sign = NON_NEGATVE;
-    y_->sign = NON_NEGATVE;
+    x_->sign = NON_NEGATIVE;
+    y_->sign = NON_NEGATIVE;
     MULC_Karatsuba(x_, y_, z);
     x_->sign = x_sign;
     y_->sign = y_sign;
@@ -670,7 +670,7 @@ void SQU(bigint* x, bigint** y)
 
     if (IsZero(x_) || IsOne(x_)){
         bigint_assign(y, x_);
-        (*y)->sign = NON_NEGATVE;
+        (*y)->sign = NON_NEGATIVE;
         bigint_delete(&x_);
         return;
     }
@@ -682,7 +682,7 @@ void SQU(bigint* x, bigint** y)
 
 void Sqr_karatsuba(bigint* x, bigint** y)
 {
-    if (x->wordlen <= 10)
+    if (x->wordlen <= 4)
     {
         Sqr_Textbook(x, y);
         return;
@@ -693,8 +693,8 @@ void Sqr_karatsuba(bigint* x, bigint** y)
     bigint* A0 = NULL;
     bigint_assign(&A0, x);
     bigint_assign(&A1, x);
-    A0->sign = NON_NEGATVE;
-    A1->sign = NON_NEGATVE;
+    A0->sign = NON_NEGATIVE;
+    A1->sign = NON_NEGATIVE;
 
     RightShift(A1, l * WordBitLen);
     Reduction(A0, l * WordBitLen);
