@@ -68,9 +68,17 @@ int main()
 ---  
 
 ## Enterstellar library Speed
-Multiplication : Karatsuba vs SchoolBook    
+### Multiplication : Karatsuba vs SchoolBook    
 ![Untitled](./image/mul8.png)
 
 ![Untitled](./image/mul32.png)
 
 ![Untitled](./image/mul64.png)    
+
+---
+### Squaring : Karatsuba vs SchoolBook    
+![Untitled](./image/sqr8.png)
+
+![Untitled](./image/sqr32.png)
+
+![Untitled](./image/sqr64.png)  
