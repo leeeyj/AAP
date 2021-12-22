@@ -75,7 +75,6 @@ int main()
 
 ![Untitled](./image/mul64.png)    
 
----
 ### Squaring : Karatsuba vs SchoolBook    
 ![Untitled](./image/sqr8.png)
 
