@@ -63,4 +63,14 @@ int main()
 
 ![Untitled](./image/Untitled2.png)
 
-![Untitled](./image/Untitled3.png)
+![Untitled](./image/Untitled3.png)   
+	
+---  
+
+## Enterstellar library Speed
+Multiplication : Karatsuba vs SchoolBook
+![Untitled](./image/mul8.png)
+
+![Untitled](./image/mul32.png)
+
+![Untitled](./image/mul64.png)    
