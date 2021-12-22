@@ -68,7 +68,7 @@ int main()
 ---  
 
 ## Enterstellar library Speed
-Multiplication : Karatsuba vs SchoolBook
+Multiplication : Karatsuba vs SchoolBook    
 ![Untitled](./image/mul8.png)
 
 ![Untitled](./image/mul32.png)
