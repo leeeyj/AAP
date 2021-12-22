@@ -477,11 +477,11 @@ void DIV_test()
             for (int i = 1; i < 100001; i++) {                              // 100000번 테스트
                 bigint* A = NULL;
                 bigint* B = NULL;
-                bigint_gen_rand(&A, NON_NEGATVE, 40);
-                bigint_gen_rand(&B, NON_NEGATVE, 39);
+                bigint_gen_rand(&A, NON_NEGATIVE, 40);
+                bigint_gen_rand(&B, NON_NEGATIVE, 20);
                 while (IsZero(B)) {
                     bigint* B_ = NULL;
-                    bigint_gen_rand(&B_, NON_NEGATVE, 1);
+                    bigint_gen_rand(&B_, NON_NEGATIVE, 1);
                     bigint_assign(&B, B_);
                     bigint_delete(&B_);
                 }
@@ -605,12 +605,12 @@ void ModularExponentiation1_test()
                 bigint* A = NULL;
                 bigint* N = NULL;
                 bigint* M = NULL;
-                bigint_gen_rand(&A, NON_NEGATVE, 1);
-                bigint_gen_rand(&N, NON_NEGATVE, 1);
-                bigint_gen_rand(&M, NON_NEGATVE, 1);
+                bigint_gen_rand(&A, NON_NEGATIVE, 1);
+                bigint_gen_rand(&N, NON_NEGATIVE, 1);
+                bigint_gen_rand(&M, NON_NEGATIVE, 1);
                 while (IsZero(M)) {
                     bigint* M_ = NULL;
-                    bigint_gen_rand(&M_, NON_NEGATVE, 1);
+                    bigint_gen_rand(&M_, NON_NEGATIVE, 1);
                     bigint_assign(&M, M_);
                     bigint_delete(&M_);
                 }
@@ -731,12 +731,12 @@ void ModularExponentiation2_test() {
                 bigint* A = NULL;
                 bigint* N = NULL;
                 bigint* M = NULL;
-                bigint_gen_rand(&A, NON_NEGATVE, 1);
-                bigint_gen_rand(&N, NON_NEGATVE, 1);
-                bigint_gen_rand(&M, NON_NEGATVE, 1);
+                bigint_gen_rand(&A, NON_NEGATIVE, 1);
+                bigint_gen_rand(&N, NON_NEGATIVE, 1);
+                bigint_gen_rand(&M, NON_NEGATIVE, 1);
                 while (IsZero(M)) {
                     bigint* M_ = NULL;
-                    bigint_gen_rand(&M_, NON_NEGATVE, 1);
+                    bigint_gen_rand(&M_, NON_NEGATIVE, 1);
                     bigint_assign(&M, M_);
                     bigint_delete(&M_);
                 }
